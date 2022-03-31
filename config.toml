@@ -1,0 +1,19 @@
+base_url = "https://bazbaze.com"
+compile_sass = true
+title = "Baz's blog"
+description = ""
+generate_feed = true
+
+taxonomies = [
+    {name = "categories", feed = true},
+    {name = "tags", feed = true},
+]
+
+[extra]
+author = "Baz"
+after_dark_menu = [
+    {url = "$BASE_URL", name = "Home"},
+    {url = "$BASE_URL/categories", name = "Categories"},
+    {url = "$BASE_URL/tags", name = "Tags"},
+]
+after_dark_title = "Baz's blog"
