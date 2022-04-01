@@ -4,13 +4,13 @@ title = "Baz's blog"
 description = ""
 generate_feed = true
 
-[markdown]
-highlight_code = true
-
 taxonomies = [
     {name = "categories", feed = true},
     {name = "tags", feed = true},
 ]
+
+[markdown]
+highlight_code = true
 
 [extra]
 author = "Baz"
