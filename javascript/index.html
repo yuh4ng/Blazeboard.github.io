@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">JavaScript</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>30 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2020-08-13
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <p>JavaScript基础</p>
+<p>HTML搭建网页提供内容，实现网页的结构层</p>
+<p>CSS修饰网页，实现网页的表现层</p>
+<span id="continue-reading"></span>
+<p>JS是真正的前端语言，面向对象的，实现网页的行为层</p>
+<p>嵌入网页运行，实现网页的动态效果、表单验证、创建cookie、修改HTML等功能</p>
+<p>JavaScript组成</p>
+<p>ECMAScript+DOM（文档对象类型）+BOM（浏览器对象类型）统称为JavaScript</p>
+<p>ECMAScript包括了JS基础</p>
+<p>DOM用来描述处理网页的方法和接口</p>
+<p>BOM描述了与浏览器进行交互的方法和接口</p>
+<p>JS学习内容：</p>
+<p>数据类型（变量、数字、字符串、布尔值、数组、字典）</p>
+<p>流程控制（条件判断、循环语句）</p>
+<p>函数（定义、创建、调用、闭包、高级函数）</p>
+<p>面向对象（对象的定义、创建对象、对象的属性和方法）</p>
+<p>DOM</p>
+<p>BOM</p>
+<p>JavaScript使用的位置</p>
+<p>脚本可以放在三个位置（head区域、body区域、外部的JS文件）</p>
+<p>放在head和body的时候，都需要使用<script>标签包裹JS脚本</p>
+<p>如果要引用外部的js脚本，在HTML的head中要使用<script>标签，通过添加src属性来设置外部js脚本的位置。</p>
+<script src="test.js" rel="srcript"></script>
+<p>JavaScript注释风格</p>
+<p>单行注释//</p>
+<p>多行注释/* */</p>
+<p>JavaScript变量</p>
+<p>变量可以是任意的数据类型、变量是存储信息的容器，通过变量可以实现复杂编程，通过变量可以实现复杂运算和高级编程</p>
+<p>创建变量的语法：</p>
+<p>var a;</p>
+<p>a=“hello”;</p>
+<p>JavaScript的变量需要提前声明，需要使用关键词var来实现。因为js本质属于动态语言，所以声明变量的时候不需要指定数据的类型，声明之后直接赋值即可</p>
+<p>var a=1;</p>
+<p>var a=1;b=‘hello’;</p>
+<p>变量名称的命名规则：</p>
+<p>变量的第一个字符必须是字母、下划线、或者美元符号</p>
+<p>剩下的字符可以是下划线、美元符号或者任意的字母或者数字</p>
+<p>对大小写敏感</p>
+<p>不能使用JS的保留字和关键词，不能用函数名或者变量来命名</p>
+<p>保留字：class、export、Boolen、abstract……</p>
+<p>关键词：for、else、if、switch、try、var……</p>
+<p>变量的命名规则：</p>
+<p>驼峰标记法</p>
+<p>首字母（单词）是小写的，接下来的字母（单词）都是大写开头</p>
+<p>var thisisatest；</p>
+<p>var thisIsAText；</p>
+<p>Pascal标记法</p>
+<p>首字母（单词）是大写的，接下来的字母（单词）都是以大写开头</p>
+<p>var  ThisIsAText</p>
+<p>匈牙利标记法</p>
+<p>在Pascal标记法的前面添加一个字符用来说明该变量属于什么类型。i表示整数，s表示字符串</p>
+<p>var iThisIsATest=10;</p>
+<p>JavaScript常见的数据类型（基本数据类型）分类：</p>
+<p>undefined null Boolean number string</p>
+<p>要查看一个变量属于哪一种类型，可以通过typeof（变量）来查看</p>
+<p>JavaScript数字</p>
+<p>JS的数字对象只有一种数据类型，就是number。不区分整数、浮点数等。支持十进制、八进制、十六进制、科学计数法等，可以实现加减乘除、求余、累积等</p>
+<p>因为属于面向对象的编程语言，所以可以给数字设置属性和方法</p>
+<p>数字的属性和方法</p>
+<p>属性：</p>
+<p>NaN：非数字值   isNaN()</p>
+<p>max-value</p>
+<p>min-value</p>
+<p>方法：</p>
+<p>tostring</p>
+<p>valueof 返回数字对象的数字值</p>
+<p>JavaScript字符串</p>
+<p>string对象用于处理字符串信息</p>
+<p>赋值的时候需要添加引号，也可以设置属性和方法，可以实现字符串相加、查询、相加、匹配、替代等操作</p>
+<p>字符串属性：</p>
+<p>length：字符串长度</p>
+<p>方法：</p>
+<p>indexof()</p>
+<p>subtring()</p>
+<p>toUppercase()</p>
+<p>big()</p>
+<p>bold()</p>
+<p>concat()   连接字符串</p>
+<p>fontcolor()</p>
+<p>字符串的索引</p>
+<p>charAt()    charcodeat():通过下标检索字符</p>
+<p>indexof()    lastindexof(): 通过字符检索下标</p>
+<p>字符串截取</p>
+<p>slice() substring() substr()</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>    function getMail(){</span><span>
+</span><span>		var mail=prompt(&#39;请输入邮箱：&#39;);</span><span>
+</span><span>		var pos=mail.indexOf(&#39;@&#39;);</span><span>
+</span><span>		var name=mail.slice(0,pos);</span><span>
+</span><span>		var address=mail.substr(pos+1);</span><span>
+</span><span>	document.write(&#39;你输入的邮箱用户名是：&#39;+name+&#39;&lt;br&gt;&#39;);</span><span>
+</span><span>	document.write(&#39;你输入的邮箱域名是：&#39;+address+&#39;&lt;br&gt;&#39;);</span><span>
+</span><span>	}</span><span>
+</span><span>	getMail(); </span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>字符串的分割替换</p>
+<p>split()  将字符串转换成数组    var a=[1,2,3]</p>
+<p>replease()</p>
+<p>字符串的大小写转换</p>
+<p>toUperCase()</p>
+<p>toLowerCase()</p>
+<p>JavaScript布尔值</p>
+<p>布尔对象的作用就是将非逻辑值转换成逻辑值（true或者false）</p>
+<p>创建布尔对象的语法：</p>
+<p>new Boolean( value)</p>
+<p>Boolean(value)</p>
+<p>创建值为false的Boolean对象：</p>
+<p>var a=new Boolean();</p>
+<p>var a=new Boolean(0);</p>
+<p>var a=new Boolean(“”)</p>
+<p>var a=new Boolean(false)</p>
+<p>var a=new Boolean(NaN)</p>
+<p>var a=new Boolean(null);</p>
+<p>创建值为true的Boolean对象:</p>
+<p>var a=new Boolean(1);</p>
+<p>var a=new Boolean(true);</p>
+<p>var a=new Boolean(‘false’);</p>
+<p>布尔运算</p>
+<p>判断 &gt;&lt;=</p>
+<p>计算 &amp;&amp;||！</p>
+<p>JavaScript数组</p>
+<p>数组也是用来存储信息的容器，包括数字、字符串、数组、布尔值。</p>
+<p>数组也可以设置属性和方法，可以实现数组的索引、相加、截取等操作</p>
+<p>创建数组</p>
+<p>第一种方法：</p>
+<p>var a=new Array();</p>
+<p>a[0]=1;</p>
+<p>a[1]=‘hello’;</p>
+<p>a[2]=[1,2,3]</p>
+<p>第二种方法：</p>
+<p>var b=new Array(1,’hello’,[1,2,3])</p>
+<p>第三种方式：</p>
+<p>var c=[1,’hello’,[1,2,3]]</p>
+<p>访问数组：</p>
+<p>var x=a[1]</p>
+<p>数组索引：var x=a[1]</p>
+<p>数字长度：var x=a.lenth</p>
+<p>数组截取：var x=a.slice(0,2)</p>
+<p>数组相连：a.concat(b)</p>
+<p>数组搜索：var x=a.indexOf(3)</p>
+<p>数组修改a[0]=10</p>
+<p>数组的属性和方法</p>
+<p>属性</p>
+<p>length</p>
+<p>方法</p>
+<p>concat()</p>
+<p>join()  把数组转换成字符串</p>
+<p>pop()  弹出数组的最后一个元素，并且显示出来</p>
+<p>push()  往数组的末尾添加元素，返回新数组的长度</p>
+<p>reverse()  颠倒数组中元素的顺序</p>
+<p>shift()  删除数组的第一个元素，并且把删除的元素显示出来</p>
+<p>slice()</p>
+<p>sort()  对数组的元素进行排序</p>
+<p>数组搜索</p>
+<p>indexOf()   lastindexOf()</p>
+<p>数组在搜索的时候要完全匹配才可以</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var nums=[3,4,5,6,1,&#39;hi&#39;,3,&#39;hi&#39;,&#39;hi&#39;];</span><span>
+</span><span>        var pos=nums.indexOf(&#39;hi&#39;,1)</span><span>
+</span><span>        function ArrayIndexOf(arr,value){</span><span>
+</span><span>            var a=[];</span><span>
+</span><span>            for(var i=0;i&lt;arr.length;i++){</span><span>
+</span><span>                if (arr[i]===value){</span><span>
+</span><span>                    a.push(i)</span><span>
+</span><span>                }</span><span>
+</span><span>            }</span><span>
+</span><span>            console.log(a)</span><span>
+</span><span>        }</span><span>
+</span><span>        var pos2=ArrayIndexOf(nums,1)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>双等号==： </p>
+<p>\1.   如果两个值类型相同，再进行三个等号(===)的比较</p>
+<p>\2.   如果两个值类型不同，也有可能相等，需根据以下规则进行类型转换在比较：</p>
+<p>·    如果一个是null，一个是undefined，那么相等</p>
+<p>·    如果一个是字符串，一个是数值，把字符串转换成数值之后再进行比较</p>
+<p>三等号===:</p>
+<p>\1.   如果类型不同，就一定不相等</p>
+<p>\2.   如果两个都是数值，并且是同一个值，那么相等；如果其中至少一个是NaN，那么不相等。（判断一个值是否是NaN，只能使用isNaN( ) 来判断）</p>
+<p>\3.   如果两个都是字符串，每个位置的字符都一样，那么相等，否则不相等。</p>
+<p>\4.   如果两个值都是true，或是false，那么相等</p>
+<p>\5.   如果两个值都引用同一个对象或是函数，那么相等，否则不相等</p>
+<p>\6.   如果两个值都是null，或是undefined，那么相等</p>
+<p>js里面带“”和不带“”的数字用==的值是一致的，如果是===就不一致，因为类型不一样（带双引号是字符串，不带双引号是数字）</p>
+<p>数组增删</p>
+<p>push() pop() shift() unshift()</p>
+<p>数组的排序</p>
+<p>sort()   reverse()   join()</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var nums=[1,2,3]</span><span>
+</span><span>        var nums1=[-10,6,9,2,100,99,-88]</span><span>
+</span><span>        var a=nums.reverse()</span><span>
+</span><span>        console.log(a)</span><span>
+</span><span>        var b=nums1.sort(function(a,b){return a-b})</span><span>
+</span><span>        console.log(b)</span><span>
+</span><span>        // document.write(a)</span><span>
+</span><span>        // document.write(typeof(a))</span><span>
+</span><span>        // console.log(nums)</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span></code></pre>
+<p>数组截取</p>
+<p>slice()</p>
+<p>splice()   删除掉元素并返回删掉的内容</p>
+<p>var a=nums.splice(2,3)是指删掉2之后的3个元素</p>
+<p>var a=nums.splice(2,3,888) 删掉2之后的3个元素并用888替换删掉的元素</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var nums=[1,2,3,4,5,6,7,8]</span><span>
+</span><span>        var nums1=[-10,6,9,2,100,99,-88]</span><span>
+</span><span>        var a=nums.splice(2,3,888,&#39;hello&#39;)</span><span>
+</span><span>        console.log(a)</span><span>
+</span><span>        console.log(nums)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>concat()</p>
+<p>JavaScript字典</p>
+<p>字典对象通过映射这个方式实现键值对的数据存储。字典可以访问、修改、判断</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var dict={</span><span>
+</span><span>            a:1,b:2,c:3,d:&#39;hello&#39;,</span><span>
+</span><span>        }</span><span>
+</span><span>
+</span><span>        var x=dict.a;  //访问字典</span><span>
+</span><span>        document.write(x)</span><span>
+</span><span>
+</span><span>        dict.d=&#39;hi&#39;  //修改字典</span><span>
+</span><span>        document.write(dict.d)</span><span>
+</span><span>
+</span><span>        var y=&#39;hello&#39; in dict;  //in、not in成员操作符，返回值是布尔值</span><span>
+</span><span>        document.write(y)</span><span>
+</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>
+</span><span>JavaScript日期</span><span>
+</span><span>日期对象用于处理时间和日期</span><span>
+</span><span>语法：</span><span>
+</span><span>var a=new Date();</span><span>
+</span><span>
+</span><span>常用的方法：</span><span>
+</span><span>getfullyear()</span><span>
+</span><span>getmonth()</span><span>
+</span><span>getDate()</span><span>
+</span><span>getDay()</span><span>
+</span><span>getHours()</span><span>
+</span><span>
+</span><span>&lt;body&gt;</span><span>
+</span><span>    &lt;button onclick=&quot;Time()&quot;&gt;点击显示日期&lt;/button&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        function Time(){</span><span>
+</span><span>            var a=new Date()</span><span>
+</span><span>            document.write(a)    </span><span>
+</span><span>        }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        var a=new Date()</span><span>
+</span><span>        var weeks=[&#39;周日&#39;,&#39;周一&#39;,&#39;周二&#39;,&#39;周三&#39;,&#39;周四&#39;,&#39;周五&#39;,&#39;周六&#39;]</span><span>
+</span><span>        var week=a.getDay()</span><span>
+</span><span>        var year=a.getFullYear()</span><span>
+</span><span>        var month=a.getMonth()</span><span>
+</span><span>        var day=a.getDate()</span><span>
+</span><span>        var hours=a.getHours()</span><span>
+</span><span>        var minutes=a.getMinutes()</span><span>
+</span><span>        var seconds=a.getSeconds()</span><span>
+</span><span>        </span><span>
+</span><span>        var time=&#39;当前的时间是&#39;+year+&#39;年&#39;+month+&#39;月&#39;+day+&#39;日&#39;+hours+&#39;时&#39;+minutes+&#39;分&#39;+seconds+&#39;秒,&#39;+weeks[week]</span><span>
+</span><span>        document.write(time)</span><span>
+</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>
+</span></code></pre>
+<p>JavaScript日期</p>
+<p>日期对象用于处理时间和日期</p>
+<p>语法：</p>
+<p>var a=new Date();</p>
+<p>常用的方法：</p>
+<p>getfullyear()</p>
+<p>getmonth()</p>
+<p>getDate()</p>
+<p>getDay()</p>
+<p>getHours()</p>
+<p>JavaScript数学</p>
+<p>math对象用于实现数学运算，比如取绝对值，四舍五入，正弦，余弦，平方根等数学运算</p>
+<p>属性</p>
+<p>PI 返回圆周率</p>
+<p>sqrt 计算平方根</p>
+<p>方法</p>
+<p>abs()</p>
+<p>sin()</p>
+<p>cos()</p>
+<p>tan()</p>
+<p>floor()向下取整</p>
+<p>ceil()向上取整</p>
+<p>round()四舍五入</p>
+<p>max()取最大值</p>
+<p>min(x,y)</p>
+<p>random() 返回0-1之间的随机数</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        // var random=Math.random()</span><span>
+</span><span>        function getRandom(n,m){</span><span>
+</span><span>            var choice=m-n+1</span><span>
+</span><span>            return Math.floor(Math.random()*choice+n)</span><span>
+</span><span>		}</span><span>
+</span><span>        var a=getRandom(1,10)</span><span>
+</span><span>        document.write(a)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>JavaScript条件语句</p>
+<p>流程控制语句包括 if for while switch continue break</p>
+<p>if</p>
+<p>if else</p>
+<p>if elseif else</p>
+<p>switch 用来选择多个代码块之一来执行</p>
+<p>语法：</p>
+<p>if(条件){</p>
+<p>代码块</p>
+<p>}</p>
+<p>elseif{</p>
+<p>代码块</p>
+<p>}</p>
+<p>else{</p>
+<p>代码块</p>
+<p>}</p>
+<p>switch(n){</p>
+<p>case1:</p>
+<p>​	代码块1;</p>
+<p>​	break;</p>
+<p>case2:</p>
+<p>​	代码块2;</p>
+<p>​	break;</p>
+<p>default:</p>
+<p>​	如果不满足上面的case，则执行default语句</p>
+<p>}</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var a=0</span><span>
+</span><span>        if(a&gt;0){</span><span>
+</span><span>            document.write(a);</span><span>
+</span><span>        }</span><span>
+</span><span>        else if(a&lt;0){</span><span>
+</span><span>            document.write(Math.abs(a));</span><span>
+</span><span>        }</span><span>
+</span><span>        else{</span><span>
+</span><span>            document.write(&#39;haha&#39;);</span><span>
+</span><span>        }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        var a=new Date().getDay()</span><span>
+</span><span>        var x;</span><span>
+</span><span>        switch(a){</span><span>
+</span><span>            case 0:</span><span>
+</span><span>                x=&quot;星期天&quot;;</span><span>
+</span><span>                break;</span><span>
+</span><span>            case 1:</span><span>
+</span><span>                x=&quot;星期一&quot;;</span><span>
+</span><span>                break;</span><span>
+</span><span>            case 2:</span><span>
+</span><span>                x=&quot;星期二&quot;;</span><span>
+</span><span>                break;</span><span>
+</span><span>            case 3:</span><span>
+</span><span>                x=&quot;星期三&quot;;</span><span>
+</span><span>                break;</span><span>
+</span><span>            case 4:</span><span>
+</span><span>                x=&quot;星期四&quot;;</span><span>
+</span><span>                break;</span><span>
+</span><span>            case 5:</span><span>
+</span><span>                x=&quot;星期五&quot;;</span><span>
+</span><span>                break;</span><span>
+</span><span>            case 6:  //也可以换成default</span><span>
+</span><span>                x=&quot;星期六&quot;;</span><span>
+</span><span>        </span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(x);</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>JavaScript循环语句</p>
+<p>for循环代码块一定的次数</p>
+<p>for/in  循环的时候再做遍历</p>
+<p>while</p>
+<p>do/while</p>
+<p>for(语句1；语句2；语句3){</p>
+<p>​	代码块</p>
+<p>}</p>
+<p>语句一和语句三是可选的，语句二必选</p>
+<p>语句一是在循环之前执行</p>
+<p>语句三是在循环一次之后执行，也可以写在循环代码块中</p>
+<p>for(x in y){</p>
+<p>代码块；</p>
+<p>}</p>
+<p>while(循环条件){</p>
+<p>​	代码块</p>
+<p>}</p>
+<p>do{</p>
+<p>​	必须先执行的代码块</p>
+<p>}</p>
+<p>while{</p>
+<p>代码块</p>
+<p>}</p>
+<p>for循环和while循环的区别</p>
+<p>for循环一般情况下，适合运行已知循环次数的代码</p>
+<p>while循环适合运行未知循环次数的代码</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var a=0;</span><span>
+</span><span>        var i;</span><span>
+</span><span>        for(i=1;i&lt;=100;i++){</span><span>
+</span><span>            a=a+i;</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(a)</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        var a=[&#39;abc&#39;,&#39;def&#39;,&#39;xyz&#39;];</span><span>
+</span><span>        var i;</span><span>
+</span><span>        var b;</span><span>
+</span><span>        for(i=0;i&lt;a.length;i++){</span><span>
+</span><span>            b=a[i]</span><span>
+</span><span>            document.write(b+&#39;&lt;br&gt;&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        var a=0;</span><span>
+</span><span>        var i=0;</span><span>
+</span><span>        while(i&lt;10){</span><span>
+</span><span>            a=a+i;</span><span>
+</span><span>            i++;    </span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(a+&#39;&lt;br&gt;&#39;)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        var a=&#39;hello&#39;</span><span>
+</span><span>        var i=0</span><span>
+</span><span>        var b=[]</span><span>
+</span><span>        while(i&lt;a.length)</span><span>
+</span><span>        {</span><span>
+</span><span>            b.push(a[i])</span><span>
+</span><span>            i++</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(b+&#39;&lt;br&gt;&#39;)</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        var a=&#39;&#39;;</span><span>
+</span><span>        var i=0;</span><span>
+</span><span>        do{</span><span>
+</span><span>            a=a+&#39;the number is&#39;+i+&#39;&lt;br&gt;&#39;</span><span>
+</span><span>            i++</span><span>
+</span><span>        }</span><span>
+</span><span>        while(i&lt;10);</span><span>
+</span><span>        document.write(a)</span><span>
+</span><span>        </span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        for(i=1;i&lt;=9;i++){</span><span>
+</span><span>            for(j=1;j&lt;=i;j++){</span><span>
+</span><span>                document.write(j+&#39;*&#39;+i+&#39;=&#39;+j*i+&#39;&amp;nbsp;&amp;nbsp&#39;);</span><span>
+</span><span>            }</span><span>
+</span><span>            document.write(&#39;&lt;br&gt;&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span><span>
+</span></code></pre>
+<p>while循环先做判断再执行</p>
+<p>do while 先执行再判断</p>
+<p>JavaScript终止语句</p>
+<p>braek </p>
+<p>continue</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var a=&#39;&#39;;</span><span>
+</span><span>        var i=0;</span><span>
+</span><span>        for(i=0;i&lt;10;i++){</span><span>
+</span><span>            if (i==5){</span><span>
+</span><span>                continue;//也可以换成break，但是效果不同</span><span>
+</span><span>            }</span><span>
+</span><span>            a=a+&quot;the number is&quot;+i+&quot;&lt;br&gt;&quot;</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(a)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>JavaScript函数</p>
+<p>函数指的就是封装好的，可以直接调用的，可以重复使用的代码块。</p>
+<p>函数一般由变量、数据类型、表达式、流程控制等语句组成。</p>
+<p>语法</p>
+<p>基础函数</p>
+<p>function functionname(){</p>
+<p>​	函数的代码块;</p>
+<p>}</p>
+<p>带参数函数</p>
+<p>function functionname(var1,var2){</p>
+<p>函数的代码块</p>
+<p>}</p>
+<p>带返回值函数</p>
+<p>function functionname(){</p>
+<p>函数的代码块</p>
+<p>return x</p>
+<p>}</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        function abs(x){</span><span>
+</span><span>            if(x&gt;=0){</span><span>
+</span><span>                return x;</span><span>
+</span><span>            }</span><span>
+</span><span>            else{</span><span>
+</span><span>                return -x;</span><span>
+</span><span>            }</span><span>
+</span><span>        }</span><span>
+</span><span>        var a=abs(-10)</span><span>
+</span><span>        document.write(a)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        function myfunction(name,job){</span><span>
+</span><span>            document.write(&#39;welcome&#39;+name+&#39;,the&#39;+job+&#39;&lt;br&gt;&#39;);</span><span>
+</span><span>        }</span><span>
+</span><span>
+</span><span>        myfunction(&#39;xiaoming&#39;,&#39;xuesheng&#39;)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span><span>
+</span><span>&lt;script&gt;</span><span>
+</span><span>        var myobject={</span><span>
+</span><span>            firstname:&#39;li&#39;,</span><span>
+</span><span>            lastname:&#39;xiaoming&#39;,</span><span>
+</span><span>            fullname:function(){</span><span>
+</span><span>                return this.firstname+&quot; &quot;+this.lastname;</span><span>
+</span><span>            }</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(myobject.fullname())</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span><span>
+</span></code></pre>
+<p>函数的变量和作用域</p>
+<p>处于函数内部的变量称为局部变量；处于函数外部的变量称为全局变量。局部变量和全局变量的调用范围是不同的，局部变量只能用于函数内部，全局变量能作用于全局</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        function foo(){</span><span>
+</span><span>            var x,y;</span><span>
+</span><span>            x=1;</span><span>
+</span><span>            y=x+2;</span><span>
+</span><span>            return y;</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(foo())</span><span>
+</span><span>
+</span><span>        function boo(){</span><span>
+</span><span>            var x,y;</span><span>
+</span><span>            x=10;</span><span>
+</span><span>            y=x+20;</span><span>
+</span><span>            return y;</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(boo())</span><span>
+</span><span>
+</span><span>        var a=10;</span><span>
+</span><span>        function sum(){</span><span>
+</span><span>            var b=a+1;</span><span>
+</span><span>            return b;</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(sum())</span><span>
+</span><span>        document.write(x)</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>函数的闭包</p>
+<p>函数可以调用外部函数或者全局的变量，闭包可以实现更复杂的计算</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;script&gt;</span><span>
+</span><span>        var iBaseNum=10;</span><span>
+</span><span>        function addNum(iNum1,iNum2){</span><span>
+</span><span>            function doAdd(){</span><span>
+</span><span>                return iNum1+iNum2+iBaseNum;//内层函数调用外层函数的参数，这也属于闭包</span><span>
+</span><span>            }</span><span>
+</span><span>            return doAdd()</span><span>
+</span><span>        }</span><span>
+</span><span>        document.write(addNum(1,2))</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>arguments作用</p>
+<p>计算任意两个数的平均值</p>
+<p>arguments可以获取函数参数的内容和长度</p>
+<p>获取长度 arguments.length</p>
+<p>获取内容 arguments[]</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;!DOCTYPE html&gt;</span><span>
+</span><span>&lt;html lang=&quot;en&quot;&gt;</span><span>
+</span><span>    &lt;head&gt;</span><span>
+</span><span>        &lt;meta charset=&quot;UTF-8&quot;&gt;</span><span>
+</span><span>        &lt;title&gt;生日计算器&lt;/title&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        //获取用户生日信息</span><span>
+</span><span>        //通过parseInt和prompt获取年、月、日，并转化成整数</span><span>
+</span><span>            var year=parseInt(prompt(&quot;请输入您的出生年份&quot;));</span><span>
+</span><span>            var month=parseInt(prompt(&quot;请输入您的出生月份&quot;));</span><span>
+</span><span>            var day=parseInt(prompt(&quot;请输入您的出生日期&quot;));</span><span>
+</span><span>            //打印最终生日格式，在这里需要调用finalBirth函数并传入这里的year、month、day三个参数</span><span>
+</span><span>            document.write(&quot;您的生日是&quot;+year+&quot;年&quot;+finalBirth(year,month,day)+&quot;天&quot;);</span><span>
+</span><span>
+</span><span>        </span><span>
+</span><span>        //日期计算器</span><span>
+</span><span>        function finalBirth(year,month,day)</span><span>
+</span><span>        {</span><span>
+</span><span>            //定义变量n为天数</span><span>
+</span><span>            var n;</span><span>
+</span><span>            //判断是否闰年,能被4整除不被100整除，或者被400整除的</span><span>
+</span><span>            if((year%4==0&amp;&amp;year%100!=0)||year%400==0)</span><span>
+</span><span>            {</span><span>
+</span><span>                if(month==1)</span><span>
+</span><span>                    n=day;</span><span>
+</span><span>                else if(month==2)</span><span>
+</span><span>                    n=parseInt(31)+parseInt(day);</span><span>
+</span><span>                else if(month==3)</span><span>
+</span><span>                    n=parseInt(60)+parseInt(day);</span><span>
+</span><span>                else if(month==4)</span><span>
+</span><span>                    n=parseInt(91)+parseInt(day);</span><span>
+</span><span>                else if(month==5)</span><span>
+</span><span>                    n=parseInt(121)+parseInt(day);</span><span>
+</span><span>                else if(month==6)</span><span>
+</span><span>                    n=parseInt(152)+parseInt(day);</span><span>
+</span><span>                else if(month==7)</span><span>
+</span><span>                    n=parseInt(182)+parseInt(day);</span><span>
+</span><span>                else if(month==8)</span><span>
+</span><span>                    n=parseInt(213)+parseInt(day);</span><span>
+</span><span>                else if(month==9)</span><span>
+</span><span>                    n=parseInt(244)+parseInt(day);</span><span>
+</span><span>                else if(month==10)</span><span>
+</span><span>                    n=parseInt(274)+parseInt(day);</span><span>
+</span><span>                else if(month==11)</span><span>
+</span><span>                    n=parseInt(305)+parseInt(day);</span><span>
+</span><span>                else if(month==12)</span><span>
+</span><span>                    n=parseInt(335)+parseInt(day);</span><span>
+</span><span>            }</span><span>
+</span><span>            else</span><span>
+</span><span>            {</span><span>
+</span><span>                if(month==1)</span><span>
+</span><span>                    n=day;</span><span>
+</span><span>                else if(month==2)</span><span>
+</span><span>                    n=parseInt(31)+parseInt(day);</span><span>
+</span><span>                else if(month==3)</span><span>
+</span><span>                    n=parseInt(59)+parseInt(day);</span><span>
+</span><span>                else if(month==4)</span><span>
+</span><span>                    n=parseInt(90)+parseInt(day);</span><span>
+</span><span>                else if(month==5)</span><span>
+</span><span>                    n=parseInt(120)+parseInt(day);</span><span>
+</span><span>                else if(month==6)</span><span>
+</span><span>                    n=parseInt(151)+parseInt(day);</span><span>
+</span><span>                else if(month==7)</span><span>
+</span><span>                    n=parseInt(181)+parseInt(day);</span><span>
+</span><span>                else if(month==8)</span><span>
+</span><span>                    n=parseInt(212)+parseInt(day);</span><span>
+</span><span>                else if(month==9)</span><span>
+</span><span>                    n=parseInt(243)+parseInt(day);</span><span>
+</span><span>                else if(month==10)</span><span>
+</span><span>                    n=parseInt(273)+parseInt(day);</span><span>
+</span><span>                else if(month==11)</span><span>
+</span><span>                    n=parseInt(304)+parseInt(day);</span><span>
+</span><span>                else if(month==12)</span><span>
+</span><span>                    n=parseInt(334)+parseInt(day);</span><span>
+</span><span>                }</span><span>
+</span><span>                //判断之后，返回最终天数</span><span>
+</span><span>                return n;</span><span>
+</span><span>        }</span><span>
+</span><span>        //执行函数</span><span>
+</span><span>            getBirth();</span><span>
+</span><span>        &lt;/script&gt;</span><span>
+</span><span>    &lt;/head&gt;</span><span>
+</span><span>    &lt;body&gt;</span><span>
+</span><span>    &lt;/body&gt;</span><span>
+</span><span>&lt;/html&gt;</span><span>
+</span></code></pre>
+<p>JavaScript DOM</p>
+<p>DOM(document object model)</p>
+<p>文档对象类型是浏览器处理网页的一种方法，包括读、增、删、改等操作</p>
+<p>浏览器进行网页加载时，会建立DOM树，并将网页元素放在不同的节点中，不管什么网页，都可以基于DOM来处理</p>
+<p><img src="images/JavaScript/image-20200812183609730.png" alt="image-20200812183609730" /></p>
+<p>一切皆节点</p>
+<p>整个文档是一个文档节点</p>
+<p>每一个html元素是元素节点</p>
+<p>html元素内的文本是文本节点</p>
+<p>html元素的属性是属性节点</p>
+<p>注释是注释节点</p>
+<p>各个节点之间存在父、子、同胞关系，所以就形成了DOM树</p>
+<p>DOM的属性和方法</p>
+<p>innelHTML节点的文本值</p>
+<p>attribute 节点的属性节点</p>
+<p>parentNode 父节点</p>
+<p>childNode 子节点</p>
+<p>DOM方法</p>
+<p>getElementById() 返回带有指定ID的元素</p>
+<p>getElementsByTagName()返回带有指定标签名称的所有元素的数组</p>
+<p>getElementsByClassName() 包含带有指定类名的所有元素的节点列表</p>
+<p>appendchild() 把新的子节点添加到指定节点</p>
+<p>removechild() </p>
+<p>replacechild()</p>
+<p>insertbefore()</p>
+<p>creatElement() 创建元素节点</p>
+<p>creatTextNode() 创建文本节点</p>
+<p>createattribute() 创建属性节点</p>
+<p>getattribute() 返回指定的属性值</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;body&gt;</span><span>
+</span><span>    &lt;h1 id=&#39;dom&#39;&gt;hello world&lt;/h1&gt;</span><span>
+</span><span>    &lt;h1 class=&quot;haha&quot;&gt;hi world&lt;/h1&gt;</span><span>
+</span><span>    &lt;h1 class=&quot;haha&quot;&gt;test&lt;/h1&gt; </span><span>
+</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        var a=document.getElementById(&#39;dom&#39;); //获取的是元素</span><span>
+</span><span>        var b=document.getElementsByClassName(&#39;haha&#39;); //把获取到的元素放入一个列表，通过列表遍历来访问</span><span>
+</span><span>        var c=document.getElementsByTagName(&#39;h1&#39;) //把获取到的元素放入一个数组，通过数组遍历来访问</span><span>
+</span><span>        document.write(a.innerHTML+&#39;&lt;br&gt;&#39;)</span><span>
+</span><span>        document.write(b[0].innerHTML+&#39;&lt;br&gt;&#39;)  //列表遍历</span><span>
+</span><span>        document.write(c[2].innerHTML+&#39;&lt;br&gt;&#39;) //数组遍历</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span><span>
+</span><span>
+</span><span>&lt;div id=&#39;div1&#39;&gt;</span><span>
+</span><span>        &lt;p id=&quot;p1&quot;&gt;this is test1&lt;/p&gt;</span><span>
+</span><span>        &lt;p id=&quot;p2&quot;&gt;this is test2&lt;/p&gt;</span><span>
+</span><span>    &lt;/div&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        var a=document.createElement(&#39;p&#39;)</span><span>
+</span><span>        var b=document.createTextNode(&#39;this is test3&#39;)</span><span>
+</span><span>        a.appendChild(b)</span><span>
+</span><span>        var c=document.getElementById(&#39;div1&#39;)</span><span>
+</span><span>        c.appendChild(a)</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>
+</span><span>
+</span><span>&lt;body&gt;</span><span>
+</span><span>    &lt;div id=&#39;div1&#39;&gt;</span><span>
+</span><span>        &lt;p id=&quot;p1&quot; onclick=&quot;document.getElementById(&#39;p1&#39;).style.color=&#39;blue&#39;&quot;&gt;this is test1&lt;/p&gt;</span><span>
+</span><span>        &lt;p id=&quot;p2&quot;&gt;this is test2&lt;/p&gt;</span><span>
+</span><span>    &lt;/div&gt;</span><span>
+</span><span>    &lt;a id=&quot;pinke&quot; href=&quot;https://www.pinginglab.net&quot; target=&quot;_blank&quot;&gt;拼客学院&lt;/a&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        //创建并添加新的节点</span><span>
+</span><span>        var a=document.createElement(&#39;p&#39;)</span><span>
+</span><span>        var b=document.createTextNode(&#39;this is test3&#39;)</span><span>
+</span><span>        a.appendChild(b)</span><span>
+</span><span>        var c=document.getElementById(&#39;div1&#39;)</span><span>
+</span><span>        c.appendChild(a)</span><span>
+</span><span>
+</span><span>        //改变HTML样式</span><span>
+</span><span>        document.getElementById(&#39;p1&#39;).style.color=&#39;red&#39;;</span><span>
+</span><span>        document.getElementById(&#39;p2&#39;).style.fontSize=&#39;20px&#39;;</span><span>
+</span><span>
+</span><span>        //修改HTML属性</span><span>
+</span><span>        var d=document.getElementById(&#39;pinke&#39;)</span><span>
+</span><span>        d.href=&quot;https://www.baidu.com&quot;</span><span>
+</span><span>
+</span><span>        var e=document.getElementsByTagName(&#39;p&#39;)</span><span>
+</span><span>        e[2].style.color=&#39;blue&#39;</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span></code></pre>
+<p>DOM事件</p>
+<p>事件就是文档或者浏览器窗口中发生的一些特定的交互瞬间</p>
+<p>下面这些情况会触发事件：</p>
+<p>当用户点击鼠标时</p>
+<p>当网页已加载时</p>
+<p>当图片已加载时</p>
+<p>当鼠标移动到元素上时</p>
+<p>当输入字段被改变时</p>
+<p>当HTML表单被提交时</p>
+<p>当用户触发按键时</p>
+<p>事件可以分为鼠标事件、键盘事件、表单事件、拖动事件、打印时间、剪切板事件、多媒体事件、动画事件等</p>
+<p>鼠标事件的方法属性</p>
+<p>onclick</p>
+<p>ondbclick 双击</p>
+<p>onmousedown 鼠标按钮按下</p>
+<p>onmouseenter鼠标指针移动到元素上</p>
+<p>onmouseleave</p>
+<p>onmousemove</p>
+<p>onmouseup</p>
+<p>键盘事件方法属性</p>
+<p>onkeydown</p>
+<p>onkeyup</p>
+<p>onkeypress 按下并松开</p>
+<p>表单事件方法属性</p>
+<p>onblur失去焦点</p>
+<p>onchange表单元素内容被改变时</p>
+<p>onfocus获得焦点</p>
+<p>oninput获取用户输入时</p>
+<p>onselect用户选取文本时</p>
+<p>onsubmit表单提交时</p>
+<p>剪切板事件方法属性</p>
+<p>oncopy</p>
+<p>oncut</p>
+<p>onpaste</p>
+<p>拖动事件方法属性</p>
+<p>ondrag 元素正在被拖动时</p>
+<p>ondragend</p>
+<p>ondragenter</p>
+<p>ondragleave</p>
+<p>打印事件方法属性</p>
+<p>onafterprint 打印完成后</p>
+<p>onbeforeprint 即将开始打印时</p>
+<p>多媒体事件方法属性</p>
+<p>oncanplay  用户可以开始播放时</p>
+<p>onabort  多媒体终止加载时</p>
+<p>onplay</p>
+<p>onerror</p>
+<p>框架/对象事件方法属性</p>
+<p>onabort 加载被中断</p>
+<p>onerror加载发生错误时</p>
+<p>onload 完成加载时</p>
+<p>onscroll滚动时</p>
+<p>onresize窗口被调整大小时</p>
+<p>事件绑定</p>
+<p>直接将HTML的元素绑定DOM事件</p>
+<p>语法：</p>
+<p>&lt;tag 事件=“执行脚本”&gt;</tag></p>
+<p>执行脚本也可以是一个函数</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;body&gt;</span><span>
+</span><span>    &lt;div class=&quot;btn&quot; onmouseover=&quot;mouseover(this,&#39;yellow&#39;)&quot; onmouseout=&quot;mouseout(this,&#39;blue&#39;)&quot;&gt;开始&lt;/div&gt;</span><span>
+</span><span>    &lt;div class=&quot;btn&quot; onmouseover=&quot;mouseover(this,&#39;green&#39;)&quot; onmouseout=&quot;mouseout(this,&#39;gray&#39;)&quot;&gt;结束&lt;/div&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        function mouseover(btn,bgcolor){</span><span>
+</span><span>            btn.style.background=bgcolor;</span><span>
+</span><span>        }</span><span>
+</span><span>        function mouseout(btn,bgcolor){</span><span>
+</span><span>            btn.style.background=bgcolor;</span><span>
+</span><span>        }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span></code></pre>
+<p>DOM 0级事件绑定</p>
+<p>DOM 0级事件和HTML事件的区别在于0级事件绑定需要先通过DOM方法（比如说getElementById()）获取DOM的对象（HTML元素），然后在DOM对象上面绑定事件。</p>
+<p>HTML事件的缺点就是会导致代码非常冗余。0级事件更加灵活，并且代码非常简洁。使用0级事件也可以使HTML代码与JS代码分离。</p>
+<p>语法：</p>
+<p>element事件=执行脚本</p>
+<p>执行脚本可以是函数，也可以是函数的调用</p>
+<p>如果要调用函数是函数生效，函数名称后面必须加括号</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;body&gt;</span><span>
+</span><span>    &lt;div class=&quot;btn&quot;&gt;开始&lt;/div&gt;</span><span>
+</span><span>    &lt;div class=&quot;btn&quot;&gt;结束&lt;/div&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        var a=document.getElementsByClassName(&#39;btn&#39;);</span><span>
+</span><span>        a[0].onmouseover=mouseover;</span><span>
+</span><span>
+</span><span>        function mouseover(){</span><span>
+</span><span>            alert(&#39;hello&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>        function mouseout(btn,bgcolor){</span><span>
+</span><span>            btn.style.background=bgcolor;</span><span>
+</span><span>        }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span></code></pre>
+<p>事件案例</p>
+<p>onload</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;body&gt;</span><span>
+</span><span>    &lt;!-- &lt;div id=&quot;haha&quot;&gt;这是一个测试&lt;/div&gt; --&gt;</span><span>
+</span><span>    &lt;img src=&quot;time.jpeg&quot; width=&quot;200px&quot; height=&quot;100px&quot; id=&quot;img&quot;&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        var a=document.getElementById(&#39;img&#39;)</span><span>
+</span><span>        a.onload=function(){</span><span>
+</span><span>            this.style.opacity=0.1</span><span>
+</span><span>        }</span><span>
+</span><span>        // window.onload=function(){</span><span>
+</span><span>        //     var a=document.getElementById(&#39;haha&#39;)</span><span>
+</span><span>        //     var clicked=function(){</span><span>
+</span><span>        //         alert(&#39;hello&#39;);</span><span>
+</span><span>        //     }</span><span>
+</span><span>        //     a.onclick=clicked;</span><span>
+</span><span>        // }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span></code></pre>
+<p>onfocus     onblur    事件</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;body&gt;</span><span>
+</span><span>    &lt;div class=&quot;haha&quot;&gt;</span><span>
+</span><span>        &lt;div class=&quot;shuru&quot;&gt;</span><span>
+</span><span>            &lt;input type=&quot;text&quot; placeholder=&quot;请输入手机号码&quot; id=&quot;dianhua&quot;&gt;</span><span>
+</span><span>        &lt;/div&gt; </span><span>
+</span><span>        &lt;div calss=&quot;tishi&quot;&gt;请输入正确的手机号码&lt;/div&gt; </span><span>
+</span><span>    &lt;/div&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        var a=document.getElementById(&#39;dianhua&#39;)</span><span>
+</span><span>        a.onfocus=function(){</span><span>
+</span><span>            this.style.background=&#39;green&#39;</span><span>
+</span><span>        }</span><span>
+</span><span>        a.onblur=function(){</span><span>
+</span><span>            this.style.background=&#39;red&#39;</span><span>
+</span><span>        }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span><span>
+</span><span>&lt;html lang=&quot;en&quot;&gt;</span><span>
+</span><span>    &lt;head&gt;</span><span>
+</span><span>        &lt;meta charset=&quot;UTF-8&quot;&gt;</span><span>
+</span><span>        &lt;title&gt;onfocus_onblur&lt;/title&gt;</span><span>
+</span><span>        &lt;style&gt;</span><span>
+</span><span>            .box</span><span>
+</span><span>            {</span><span>
+</span><span>                padding:50px;</span><span>
+</span><span>            }</span><span>
+</span><span>            .left,.tip</span><span>
+</span><span>            {</span><span>
+</span><span>                float:left;</span><span>
+</span><span>            }</span><span>
+</span><span>            .left{margin-right:10px;}</span><span>
+</span><span>            .tip{display:none;font-size:14px;}</span><span>
+</span><span>        &lt;/style&gt;</span><span>
+</span><span>        &lt;script&gt;</span><span>
+</span><span>            window.onload=function(){</span><span>
+</span><span>                //第一步，获取文本框和提示框</span><span>
+</span><span>                var phone=document.getElementById(&quot;phone&quot;),</span><span>
+</span><span>                    tip=document.getElementById(&quot;tip&quot;);</span><span>
+</span><span>                //第二步，给文本框绑定激活的事件</span><span>
+</span><span>                phone.onfocus=function(){</span><span>
+</span><span>                    //让tip显示出来</span><span>
+</span><span>                    tip.style.display=&#39;block&#39;;}</span><span>
+</span><span>                //第三步，给文本框绑定失去焦点的事件</span><span>
+</span><span>                phone.onblur=function(){</span><span>
+</span><span>                    //获取文本框的值,value用于获取表单元素的值</span><span>
+</span><span>                    var phoneVal=this.value;</span><span>
+</span><span>                    //判断手机号码是否是11位的数字</span><span>
+</span><span>                    //如果输入正确，则显示对号图标，否则显示错号图标</span><span>
+</span><span>                    if(phoneVal.length==11&amp;&amp;isNaN(phoneVal)==false)</span><span>
+</span><span>                    {</span><span>
+</span><span>                        this.style.color=&#39;green&#39;</span><span>
+</span><span>                    }</span><span>
+</span><span>                    else{</span><span>
+</span><span>                        this.style.color=&#39;red&#39;</span><span>
+</span><span>                        }</span><span>
+</span><span>                    }</span><span>
+</span><span>                }</span><span>
+</span><span>        &lt;/script&gt;</span><span>
+</span><span>    &lt;/head&gt;</span><span>
+</span><span>    &lt;body&gt;</span><span>
+</span><span>        &lt;div class=&quot;box&quot;&gt;</span><span>
+</span><span>            &lt;div class=&quot;left&quot;&gt;</span><span>
+</span><span>                &lt;input type=&quot;text&quot; id=&quot;phone&quot; placeholder=&quot;请输入手机号码&quot;&gt;</span><span>
+</span><span>            &lt;/div&gt;</span><span>
+</span><span>            &lt;div class=&quot;tip&quot; id=&quot;tip&quot;&gt;</span><span>
+</span><span>            请输入有效的手机号码</span><span>
+</span><span>            &lt;/div&gt;</span><span>
+</span><span>        &lt;/div&gt;</span><span>
+</span><span>    &lt;/body&gt;</span><span>
+</span><span>&lt;/html&gt;</span><span>
+</span></code></pre>
+<p>onchange事件</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;div class=&quot;box&quot;&gt;</span><span>
+</span><span>        选择喜欢的背景色：</span><span>
+</span><span>        &lt;select id=&quot;menu&quot;&gt;</span><span>
+</span><span>            &lt;option value=&quot;&quot; hidden disabled selected&gt;请选择&lt;/option&gt;</span><span>
+</span><span>            &lt;option value=&quot;red&quot;&gt;红色&lt;/option&gt;</span><span>
+</span><span>            &lt;option value=&quot;green&quot;&gt;绿色&lt;/option&gt;</span><span>
+</span><span>            &lt;option value=&quot;blue&quot;&gt;蓝色&lt;/option&gt;</span><span>
+</span><span>            &lt;option value=&quot;yellow&quot;&gt;黄色&lt;/option&gt;</span><span>
+</span><span>            &lt;option value=&quot;gray&quot;&gt;灰色&lt;/option&gt;</span><span>
+</span><span>        &lt;/select &gt;</span><span>
+</span><span>    &lt;/div&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        var menu=document.getElementById(&#39;menu&#39;)</span><span>
+</span><span>        menu.onchange=function(){</span><span>
+</span><span>            var bgcolor=menu.options[menu.selectedIndex].value;</span><span>
+</span><span>            document.body.style.background=bgcolor</span><span>
+</span><span>        }</span><span>
+</span><span>&lt;/script&gt;</span><span>
+</span></code></pre>
+<p>onmousedown    nomouseup    onscroll    事件；</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;html lang=&quot;en&quot;&gt;</span><span>
+</span><span>&lt;head&gt;</span><span>
+</span><span>    &lt;meta charset=&quot;UTF-8&quot;&gt;</span><span>
+</span><span>    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;</span><span>
+</span><span>    &lt;title&gt;Document&lt;/title&gt;</span><span>
+</span><span>    &lt;style&gt;</span><span>
+</span><span>        .box{</span><span>
+</span><span>        width:200px;</span><span>
+</span><span>        height: 200px;</span><span>
+</span><span>        background-color: gray;</span><span>
+</span><span>        overflow: auto;</span><span>
+</span><span>
+</span><span>    }</span><span>
+</span><span>    &lt;/style&gt;</span><span>
+</span><span>&lt;/head&gt;</span><span>
+</span><span>&lt;body&gt;</span><span>
+</span><span>    &lt;div class=&quot;box&quot; id=&quot;box&quot;&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>        &lt;p&gt;这是测试段落&lt;/p&gt;</span><span>
+</span><span>    &lt;/div class=&quot;box&quot;&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;p&gt;test&lt;/p&gt;</span><span>
+</span><span>    &lt;script&gt;</span><span>
+</span><span>        var box=document.getElementById(&#39;box&#39;)</span><span>
+</span><span>        box.onmousedown=function(){</span><span>
+</span><span>            console.log(&#39;我被按下了&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>        box.onmouseup=function(){</span><span>
+</span><span>            console.log(&#39;我被松开了&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>        window.onresize=function(){</span><span>
+</span><span>            console.log(&#39;我的尺寸被改变了&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>        box.onscroll=function(){</span><span>
+</span><span>            console.log(&#39;我被滚动了&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>        box.onclick=function(){</span><span>
+</span><span>            console.log(&#39;我被点击了&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>        box.onmousemove=function(){</span><span>
+</span><span>            console.log(&#39;我被abc了&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>        window.onscroll=function(){</span><span>
+</span><span>            console.log(&#39;我是窗口滚动条&#39;)</span><span>
+</span><span>        }</span><span>
+</span><span>    &lt;/script&gt;</span><span>
+</span><span>&lt;/body&gt;</span><span>
+</span><span>&lt;/html&gt;</span><span>
+</span></code></pre>
+<p>onkeyup onkeydown 事件</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>&lt;html lang=&quot;en&quot;&gt;</span><span>
+</span><span>    &lt;head&gt;</span><span>
+</span><span>        &lt;meta charset=&quot;UTF-8&quot;&gt;</span><span>
+</span><span>        &lt;title&gt;onkeyup&lt;/title&gt;</span><span>
+</span><span>        &lt;style&gt;</span><span>
+</span><span>            .text span{font-weight:bold;color:black;}</span><span>
+</span><span>            em{font-style:normal; color: red;}</span><span>
+</span><span>            b{font-weight:normal;}</span><span>
+</span><span>        &lt;/style&gt;</span><span>
+</span><span>    &lt;/head&gt;</span><span>
+</span><span>    &lt;body&gt;</span><span>
+</span><span>        &lt;div&gt;</span><span>
+</span><span>            &lt;p class=&quot;text&quot;&gt;</span><span>
+</span><span>                &lt;b id=&quot;showcount&quot;&gt;您还可以输入&lt;/b&gt;</span><span>
+</span><span>                &lt;span id=&quot;totalbox&quot;&gt;&lt;em id=&quot;count&quot;&gt;30&lt;/em&gt;/30&lt;/span&gt;</span><span>
+</span><span>            &lt;/p&gt;</span><span>
+</span><span>            &lt;div class=&quot;input&quot;&gt;</span><span>
+</span><span>                &lt;textarea name=&quot;&quot; id=&quot;text&quot; cols=&quot;70&quot; rows=&quot;4&quot;&gt;&lt;/textarea&gt;</span><span>
+</span><span>            &lt;/div&gt;</span><span>
+</span><span>        &lt;/div&gt;</span><span>
+</span><span>        &lt;script&gt;</span><span>
+</span><span>            //获取文本框及其他元素</span><span>
+</span><span>            var text=document.getElementById(&quot;text&quot;);</span><span>
+</span><span>            var total=30;</span><span>
+</span><span>            var count=document.getElementById(&quot;count&quot;);</span><span>
+</span><span>            var showcount=document.getElementById(&quot;showcount&quot;);</span><span>
+</span><span>            var totalbox=document.getElementById(&quot;totalbox&quot;);</span><span>
+</span><span>            //绑定键盘事件</span><span>
+</span><span>            document.onkeyup=function()</span><span>
+</span><span>            {</span><span>
+</span><span>                //获取文本框值的长度</span><span>
+</span><span>                var len=text.value.length;</span><span>
+</span><span>                //计算可输入的剩余字符</span><span>
+</span><span>                var allow=total-len;</span><span>
+</span><span>                var overflow=len-total;</span><span>
+</span><span>                //如果allow小于0</span><span>
+</span><span>                if(allow&lt;0)</span><span>
+</span><span>                {</span><span>
+</span><span>                    showcount.innerHTML=&quot;您已超出&quot;+overflow;</span><span>
+</span><span>                    totalbox.innerHTML=&#39;&#39;;</span><span>
+</span><span>                }</span><span>
+</span><span>                else</span><span>
+</span><span>                {</span><span>
+</span><span>                    showcount.innerHTML=&#39;您还可以输入&#39;;</span><span>
+</span><span>                    totalbox.innerHTML=&#39;&lt;em id=&quot;count&quot;&gt;&#39;+allow+&#39;&lt;/em&gt;/30&#39;;</span><span>
+</span><span>                }</span><span>
+</span><span>            }</span><span>
+</span><span>        &lt;/script&gt;</span><span>
+</span><span>    &lt;/body&gt;</span><span>
+</span><span>&lt;/html&gt;</span><span>
+</span></code></pre>
+<p>JavaScript BOM</p>
+<p>browser object model浏览器对象模型，可以实现JS与浏览器之间的交互。BOMyou下面几种对象：</p>
+<p>window对象：是浏览器的实例。在浏览器中，window对象有双重角色，即是通过JS访问浏览器窗口的接口，也是ECMScript规定的全局对象</p>
+<p>location对象：用于获取当前页面的地址（URL）并把浏览器重定向到新的页面。location对象提供了与当前窗口中加载的文档有关信息，它既是window对象的属性，也是document的属性</p>
+<p>history对象：包含了浏览器的历史</p>
+<p>screen对象：包含了用户屏幕的信息</p>
+<p>navigator对象：包含了用户浏览器的信息</p>
+<p>常用的对象方法</p>
+<p>window.alert显示带有一段消息和一个确认按钮的警告框</p>
+<p>window.promt如果用户单击提示框的取消按钮则返回一个null值，如果单击确认按钮，则返回输入字段当前的信息</p>
+<p>window.confirm显示一个带有指定消息和OK以及取消按钮的对话框</p>
+<p>window.open()打开一个新窗口</p>
+<p>window.close()</p>
+<p>window.moveto()</p>
+<p>window.resizeto()</p>
+<p>settimeout</p>
+<p>setinterval</p>
+<p>location.href返回加载页面的完整的URL</p>
+<p>location.replace重定向URL地址</p>
+<p>location.host返回服务器名称和端口号</p>
+<p>location.hostname返回web主机的域名</p>
+<p>locaion.port返回web主机 的端口</p>
+<p>location.protocal返回web使用的协议</p>
+<p>screen.availwidth可用的屏幕宽度</p>
+<p>screen.availheight可用的屏幕高度</p>
+<p>navigator.useragent返回浏览器的型号信息</p>
+<p>screen对象</p>
+<p>window.innerWidth/innerHeight      浏览器的宽度和高度</p>
+<p>window.screen.availwidth/window.innerheight       屏幕的宽度和高度</p>
+<p>navigator对象</p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

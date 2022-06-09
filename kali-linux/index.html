@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Kali Linux</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>11 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2020-07-25
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <h1 id="linuxmu-lu-jie-gou">Linux目录结构</h1>
+<p><strong>核心思想：一切皆文件</strong></p>
+<p>![](images/Kali Linux/1038b33437c725c8cc66852e4745d20.png)</p>
+<hr />
+<h1 id="linuxwen-jian-ji-ben-shu-xing">Linux文件基本属性</h1>
+<p>Linux是一种典型的多用户系统，终端情况下，可同时登录多个用户。</p>
+<span id="continue-reading"></span>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>0   位   确定文件类型</span><span>
+</span><span>1-3 位   确定属主（该文件的所有者）拥有该文件的权限</span><span>
+</span><span>4-6 位   确定属组（所有者的同组用户）拥有该文件的权限</span><span>
+</span><span>7-9 位   确定其他用户拥有该文件的权限</span><span>
+</span></code></pre>
+<p>文件类型：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>d 表示目录</span><span>
+</span><span>- 表示文件</span><span>
+</span><span>/ 表示链接文档（link file）</span><span>
+</span><span>b 表示装置文件里面的可供储存的接口设备（可随机存储装置）</span><span>
+</span><span>c 表示装置文件里面的串行端口设备，例如键盘、鼠标（一次性读取装置）</span><span>
+</span></code></pre>
+<p>文件权限：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>r read 4</span><span>
+</span><span>w write 2</span><span>
+</span><span>x execute 1</span><span>
+</span></code></pre>
+<hr />
+<h1 id="linuxwen-jian-cao-zuo">Linux文件操作</h1>
+<h3 id="linuxji-chu-ming-ling">Linux基础命令</h3>
+<p><strong>文件管理：</strong></p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>whatis&lt;command&gt;     查看命令的作用</span><span>
+</span><span>ls                  列出当前目录下的内容</span><span>
+</span><span>ls -a               列出所有文件，包括隐藏文件</span><span>
+</span><span>ls -l               列出常数据串（文件属性和权限）</span><span>
+</span><span>ls -al              </span><span>
+</span><span>ls -al&lt;目录&gt;         </span><span>
+</span><span>man&lt;command&gt;        查询命令的说明文档</span><span>
+</span><span>which               查看文件所在的路径</span><span>
+</span><span>cd                  进入指定目录</span><span>
+</span><span>/                   根目录</span><span>
+</span><span>~                   当前的用户目录</span><span>
+</span><span>.                   当前目录</span><span>
+</span><span>..                  上级目录</span><span>
+</span><span>pwd                 显示当前的路径</span><span>
+</span><span>mkdir               创建一个新目录</span><span>
+</span><span>mkdir -m 666        创建并赋予权限</span><span>
+</span><span>mkdir -p ......     递归创建</span><span>
+</span><span>touch               创建一个新的文件</span><span>
+</span><span>cat                 查看文件内容</span><span>
+</span><span>cp 源文件 目标文件    复制文件</span><span>
+</span><span>mv 源文件 目标文件    移动（或重命名）文件</span><span>
+</span><span>mv -f               强制移动，不会询问是否覆盖</span><span>
+</span><span>mv -i               若目标文件存在，询问是否存在</span><span>
+</span><span>mv -u               若目标文件存在，且源文件比较新，才会更新</span><span>
+</span><span>mv /dir/* .       将目录dir下的文件移动到当前目录</span><span>
+</span><span>file&lt;file&gt;          显示指定文件的文件类型</span><span>
+</span><span>file -i&lt;显示&gt;        显示MIME类别</span><span>
+</span><span>chmod               修改文件权限</span><span>
+</span><span>chmod + ...</span><span>
+</span><span>chown               将指定文件的拥有者改为指定的用户和 用户组，用户可以是用户名或者用户id，组可以使用组名或者组id</span><span>
+</span><span>su root             变更使用者身份</span><span>
+</span><span>su pinginglab       变更使用者身份</span><span>
+</span><span>sudo                以管理员权限执行命令</span><span>
+</span><span>sudo -l             列出当前的权限</span><span>
+</span><span>/etc/sudoers</span><span>
+</span><span>chown -R            更改指定目录下的所有文件及其子文件的拥有者和所属组</span><span>
+</span><span>chown -R xxx:xxx*   更改当前目录下的所有文件及其子文件的拥有者和所属组</span><span>
+</span><span>rmdir               删除空目录</span><span>
+</span><span>rmdir *             删除所有空目录</span><span>
+</span><span>cp 源 目             复制文件</span><span>
+</span><span>cp -i 源 目          若目存在，则覆盖时会询问</span><span>
+</span><span>cp -r dir dir       递归复制</span><span>
+</span><span>cp -r 04 05 09 03   复制多个文件到03</span><span>
+</span><span>cp -s               复制成为符号链接，也叫做捷径文件</span><span>
+</span><span>rm                  删除文件</span><span>
+</span><span>rm -f               强制删除，忽略不存在的文件，不会出现警告</span><span>
+</span><span>rm -i               互动模式，删除之前会问你是否删除</span><span>
+</span><span>rm -rf xxx          删除指定目录</span><span>
+</span><span>rm -rf *            删除当前目录下的所有文件</span><span>
+</span></code></pre>
+<p><strong>文件内容查看：</strong></p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>cat                  由第一行开始显示内容</span><span>
+</span><span>cat -n               添加行号显示，空行亦有</span><span>
+</span><span>cat -T               将Tab键以^I显示出来</span><span>
+</span><span>cat -v               列出一些看不出来的特殊符号</span><span>
+</span><span>cat -E               将结尾处的换行符用美元符号显示出来</span><span>
+</span><span>tac                  从最后一行开始显示，跟cat相反</span><span>
+</span><span>nl                   添加行号显示，相当于cat -b</span><span>
+</span><span>more                 一页一页的显示文件内容（查看大型文件）</span><span>
+</span><span>less                 他可以往前翻页</span><span>
+</span><span>head                 查看文件前几行，默认是前行</span><span>
+</span><span>head -n 20           查看文件前20行</span><span>
+</span><span>tail                 查看文件最后的几行，默认是10行</span><span>
+</span><span>tail -n 20           </span><span>
+</span><span>&gt;</span><span>
+</span><span>null</span><span>
+</span><span>cat null &gt; xxx</span><span>
+</span><span>echo                 用于输出字符串或提取shell变量的值</span><span>
+</span><span>echo&quot;hello&quot;&gt;04.txt   覆盖写</span><span>
+</span><span>echo&#39;命令&#39;            执行命令并将其结果输出到终端</span><span>
+</span><span>\n                   换行符，相当于回车</span><span>
+</span><span>echo -e</span><span>
+</span><span>grep                 用来查找文件里符合条件的内容</span><span>
+</span><span>grep&lt;要搜索的字符串&gt;&lt;要搜索的位置&gt;</span><span>
+</span><span>grep -r http conf/etc/xxx.conf</span><span>
+</span><span>| &gt;                  管道符                 </span><span>
+</span><span>||                   或</span><span>
+</span><span>&amp;                    后台执行</span><span>
+</span><span>&amp;&amp;                   与</span><span>
+</span><span>curl                 下载文件</span><span>
+</span><span>curl -u              下载文件，提供用户名和密码</span><span>
+</span><span>zip -r xxx.zip xxx   压缩</span><span>
+</span><span>unzip xx             解压</span><span>
+</span><span>tar zcf xxx.tar.gr   压缩</span><span>
+</span><span>tar zxf              解压</span><span>
+</span></code></pre>
+<p><strong>系统管理：</strong></p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>sudo                   以管理员权限运行，必须拥有姓名</span><span>
+</span><span>su xxx                 变更使用者身份</span><span>
+</span><span>exit                   退出当前shell</span><span>
+</span><span>reboot                 重启计算机</span><span>
+</span><span>shutdown               关机</span><span>
+</span><span>power off              关闭计算机电源</span><span>
+</span><span>find                   查找和搜索文件</span><span>
+</span><span>find&lt;目录&gt; -name&lt;文件名&gt; 查找指定目录下的文件，支持通配符</span><span>
+</span><span>find      -iname        大小写不敏感</span><span>
+</span><span>find&lt;目录&gt; -size&lt;大小&gt;   查看指定目录下满足某大小条件的文件</span><span>
+</span><span>find.                   查找当前目录及其子目录下的所有文件</span><span>
+</span><span>unname -a               显示系统用户名、 内核版本号、cpu等信息</span><span>
+</span><span>date                    查看时间</span><span>
+</span><span>ps -ef                  用于显示所有进程信息</span><span>
+</span><span>ps -A                   </span><span>
+</span><span>ps -ef | grep&lt;关键词&gt;    查看指定进程信息</span><span>
+</span><span>top                     用于实时显示进程的动态</span><span>
+</span><span>kill                    用于删除执行中的程序</span><span>
+</span><span>kill&lt;PID&gt;               终止进程</span><span>
+</span><span>kill -KILL pid          强制杀死进程</span><span>
+</span><span>kill -9 pid             彻底杀死进程</span><span>
+</span><span>whoami                  显示用户名</span><span>
+</span><span>who                     显示当前登录的用户</span><span>
+</span><span>who -l -H               显示用户登录来源</span><span>
+</span><span>whois                   查看域名描述信息</span><span>
+</span><span>whois -p                指定端口查询域名</span><span>
+</span><span>free                    显示内存使用信息</span><span>
+</span><span>history                 查看用过的命令</span><span>
+</span></code></pre>
+<p><strong>网络：</strong></p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>ping                     检测网络连通性</span><span>
+</span><span>ing -c 4                 ping 4个包</span><span>
+</span><span>ping -t                  一直ping</span><span>
+</span><span>ifconfig                 ipconfig</span><span>
+</span><span>ip add                   查看网络和配置信息</span><span>
+</span><span>dhclient                 使用dhcp配置网络接口的网络参数</span><span>
+</span><span>dhclient eth0            指定网卡上发送dhcp请求</span><span>
+</span><span>dhclient -r              释放ip地址</span><span>
+</span><span>nslookup                 显示域名基本信息</span><span>
+</span><span>ssh root@92.168.1.1      登录指定用户名的主机</span><span>
+</span><span>ssh 192.168.1.1          登录服务器</span><span>
+</span><span>ssh root@192.168.1.1 -p 22   登录指定用户名和端口的主机</span><span>
+</span><span>ssh -t remoteserver1 ssh remoteserver2  从远程主机1跳到远程主机2</span><span>
+</span><span>ssh l name remoteserver &lt;command&gt;  连接到远程主机并执行远程主机的命令</span><span>
+</span><span>netstat                  用于显示各种网络相关信息，如路由表、接口状态</span><span>
+</span><span>netstat -a               </span><span>
+</span><span>netstat -i               显示网卡列表</span><span>
+</span><span>netstat -at              显示所有tcp连接</span><span>
+</span><span>netstat -au              显示所有udp连接</span><span>
+</span><span>netstat -l               列出监听中的连接</span><span>
+</span><span>sodu netstat -ntlp       查看进程名、进程号pid、用户id等</span><span>
+</span><span>netstat -r               显示路由信息</span><span>
+</span><span>sudo netstat -anp | grep python   检查指定服务是否正常运行</span><span>
+</span><span>sudo netstat -anp | grep :8000    检查指定端口的服务是否正常运行</span><span>
+</span><span>nc -nvv 192.168.68.130 8000       扫描8000端口</span><span>
+</span><span>nc -nvv -w2 -z 192.168.68.130 7900-8000   扫描7900-8000所有端口</span><span>
+</span><span>nc -l -p 8888             监听本机的80端口</span><span>
+</span><span>nc -nvv 192.168.1.1 8888  连接到192.168.1.1的tcp8888端口</span><span>
+</span><span>
+</span></code></pre>
+<p><strong>用户和用户组管理</strong></p>
+<p>/etc/passwd</p>
+<p>用户账户的添加、删除、修改</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>useradd或者adduser</span><span>
+</span><span>suod useradd&lt;用户名&gt;   三无账号：home下没有相应的目录；无密码；无系统shell</span><span>
+</span><span>adduser&lt;用户名&gt;        创建新账户</span><span>
+</span><span>useradd -m(创建home目录) -s(用户登陆后使用的shell) /bin/sh blazeboard -g pinginglab   创建新账户</span><span>
+</span><span>passwd blazeboard     添加新密码</span><span>
+</span><span>sudo username -g 1000 blazeboard  更改指定用户的组标识号</span><span>
+</span><span>groupadd blazeboard   创建用户组</span><span>
+</span><span>groupdel blazeboard   删除用户组</span><span>
+</span><span>groupmod -n&lt;目标用户组&gt;&lt;源用户组&gt;   改名</span><span>
+</span><span>groupmod -g 1005&lt;用户组名&gt;        更改用户组标识号</span><span>
+</span></code></pre>
+<p>用户口令的管理</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>passwd  blazeboard     更改用户密码</span><span>
+</span></code></pre>
+<p><strong>vim编辑器基础</strong></p>
+<p>三种模式：普通模式、编辑模式、命令模式</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>普通模式:</span><span>
+</span><span>i进入编辑模式</span><span>
+</span><span>k j h l光标上下左右移动</span><span>
+</span><span>x删除当前光标所在的一个字符</span><span>
+</span><span>dd删除当前行，并把删除的行保存到剪切板中</span><span>
+</span><span>p粘贴剪切板</span><span>
+</span><span>a在光标后插入</span><span>
+</span><span>o（小）在当前行后插入一个新行</span><span>
+</span><span>O（大）在当前行前插入一个新行</span><span>
+</span><span>cw替换当前位置到下一个单词结尾</span><span>
+</span><span>0（零）到行头</span><span>
+</span><span>$到行尾</span><span>
+</span><span>yy复制当前行</span><span>
+</span><span>y复制选中内容</span><span>
+</span><span>p粘贴</span><span>
+</span><span>^</span><span>
+</span><span>g</span><span>
+</span></code></pre>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>编辑模式:</span><span>
+</span><span>esc从编辑模式退出到普通模式</span><span>
+</span></code></pre>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>命令模式:</span><span>
+</span><span>:wq保存并退出</span><span>
+</span><span>:q退出</span><span>
+</span><span>:q!强制退出</span><span>
+</span><span>:e&lt;文件路径&gt; 打开一个文件</span><span>
+</span></code></pre>
+<p>![](images/Kali Linux/86755a296c74a087c390ed635a647ce.jpg)</p>
+<h3 id="huan-yuan-yu-ruan-jian">换元与软件</h3>
+<p>sudo nano /etc/apt/sources.list</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>#阿里云</span><span>
+</span><span>deb http://mirrors.aliyun.com/kali kali-rolling main non-free contrib    </span><span>
+</span><span>deb-src http://mirrors.aliyun.com/kali kali-rolling main non-free contrib</span><span>
+</span><span>#中科大                                                           </span><span>
+</span><span>deb http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib   </span><span>
+</span><span>deb-src http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib</span><span>
+</span></code></pre>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>apt updata</span><span>
+</span><span>
+</span></code></pre>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

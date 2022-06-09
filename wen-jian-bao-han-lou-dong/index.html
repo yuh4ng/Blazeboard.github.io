@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">文件包含漏洞</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>4 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2021-06-28
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <h1 id="shi-yao-shi-wen-jian-bao-han-lou-dong">什么是文件包含漏洞</h1>
+<p>Q：什么是文件包含？<br />A：简单一句话，为了更好地使用代码的<strong>重用性</strong>，引入了文件包含函数，可以通过文件包含函数将文件包含进来，  直接使用包含文件的代码。</p>
+<span id="continue-reading"></span>
+<p>Q：文件包含漏洞的成因是什么？<br />A：在包含文件时候，为了灵活包含文件，将被包含文件设置为变量，通过动态变量来引入需要包含的文件时，<br />用户可以对变量的值可控而服务器端<strong>未对</strong>变量值进行<strong>合理地校验</strong>或者校验被<strong>绕过</strong>，这样就导致了文件包含漏洞。通常 文件包含漏洞出现在PHP语言中。<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624870392581-cfe0fa70-3c16-4cf9-9aa1-e71a9b1f5a99.png#align=left&amp;display=inline&amp;height=133&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=266&amp;originWidth=1630&amp;size=124555&amp;status=done&amp;style=none&amp;width=815" alt="image.png" /><br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624870404005-e54ac5c5-09c6-4baf-bbfb-94298a4cf536.png#align=left&amp;display=inline&amp;height=57&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=114&amp;originWidth=828&amp;size=5075&amp;status=done&amp;style=none&amp;width=414" alt="image.png" /><br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624870412164-83dce965-6a25-4b5b-9629-c7e5cc689097.png#align=left&amp;display=inline&amp;height=523&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=1046&amp;originWidth=2797&amp;size=622251&amp;status=done&amp;style=none&amp;width=1398.5" alt="image.png" /></p>
+<h1 id="wen-jian-bao-han-han-shu">文件包含函数</h1>
+<ul>
+<li>Include:</li>
+<li>Include_once:</li>
+<li>require</li>
+<li>require_once</li>
+<li>highlight_file、show_source、readfile、file_get_contents、fopen、file</li>
+</ul>
+<h1 id="wen-jian-bao-han-lou-dong-fen-lei">文件包含漏洞分类</h1>
+<ul>
+<li>本地文件包含</li>
+<li>远程文件包含</li>
+</ul>
+<p>allow_url_fopen：为ON时，能读取远程文件，例如file_get_contents()就能读远程文件<br />Allow_url_include：为ON时，就可使用include和require等方式包含远程文件</p>
+<h1 id="wen-jian-bao-han-lou-dong-de-li-yong-fang-shi">文件包含漏洞的利用方式</h1>
+<h2 id="wei-xie-yi">伪协议</h2>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624870970241-dab7c251-cb93-4464-8821-8d5e4aad74d2.png#align=left&amp;display=inline&amp;height=321&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=642&amp;originWidth=1740&amp;size=359608&amp;status=done&amp;style=none&amp;width=870" alt="image.png" /><br />php://filter 是一种元封装器， 设计用于数据流打开时的筛选过滤应用 data:// 同样类似与php://input，可以让用户来控制输入流<br />php://input可以访问请求的原始数据的只读流，将post请求的数据当作php代码执行<br />phar://xxx.png/shell.php 解压缩包的一个函数，不管后缀是什么，都会当做压缩包来解压。</p>
+<h2 id="qi-ta">其他</h2>
+<ul>
+<li>00截断</li>
+<li>长度截断（Windows：256，Linux：4096）</li>
+<li>包含日志文件</li>
+<li>包含session</li>
+</ul>
+<h1 id="wen-jian-bao-han-lou-dong-de-fang-yu">文件包含漏洞的防御</h1>
+<ul>
+<li>PHP 中使用 open_basedir 配置限制访问在指定的区域</li>
+<li>过滤.（点）/（反斜杠）\（反斜杠）</li>
+<li>禁止服务器远程文件包含</li>
+<li>尽量不要使用动态包含，可以在需要包含的页面固定写好</li>
+</ul>
+<h1 id="wen-jian-bao-han-lou-dong-shi-zhan">文件包含漏洞实战</h1>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1627145504379-33c845bd-ca62-4ada-8b01-add5100f8cff.png#align=left&amp;display=inline&amp;height=520&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=1040&amp;originWidth=1920&amp;size=100648&amp;status=done&amp;style=none&amp;width=960" alt="image.png" /><br />在hackbar中输入</p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

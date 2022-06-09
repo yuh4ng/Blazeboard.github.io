@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">SQL</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>4 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2020-08-28
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <p>SQL基础</p>
+<p>数据库：就是保存数据的仓库，他是长期存储在计算机内，可共享的数据结合</p>
+<p>数据库分类：层次型数据库、网络式数据库、关系型数据库</p>
+<p>最常见的数据库模型：关系型数据库、非关系型数据库</p>
+<span id="continue-reading"></span>
+<p>关系型数据库：</p>
+<p>表中的行列次序不重要</p>
+<p>行row：表中的行，我们称为一条记录</p>
+<p>列column：表中的列，称为属性、字段、field域</p>
+<p>主键primary key：用于唯一确认一个记录的字段</p>
+<p>域domain：属性的取值范围</p>
+<p>常见的关系型数据库</p>
+<p>MySQL 中型数据库  免费</p>
+<p>Oracle 企业用大型数据库  付费</p>
+<p>SQLite</p>
+<p>access</p>
+<p>SQLserver</p>
+<p>数据库架构</p>
+<p><img src="images/SQL/image-20200828142947181.png" alt="image-20200828142947181" /></p>
+<p>数据库操作：</p>
+<p>查看数据库：</p>
+<p>show databases;</p>
+<p>创建数据库：</p>
+<p>create database XXX;</p>
+<p>使用数据库：</p>
+<p>use XXX;</p>
+<p>查看数据表：</p>
+<p>show tables;</p>
+<p>show columns from + 表名;</p>
+<p>查看数据表的详细信息</p>
+<p>show table status from +数据库名;</p>
+<p>查看数据库版本</p>
+<p>select version()；</p>
+<p>查看当前使用的数据库</p>
+<p>select database();</p>
+<p>查看当前用户</p>
+<p>select user();</p>
+<p>查看数据库路径</p>
+<p>select @@datadir;</p>
+<p>查看数据库的安装路径</p>
+<p>select @@basedir;</p>
+<p>查看操作系统版本</p>
+<p>select @@version_compile_os;</p>
+<p>数据表操作</p>
+<p>创建数据表</p>
+<p>create table qiuzhi()</p>
+<p>create table qiuzhi(</p>
+<p>qiuzhi_id int not null auto_increment,</p>
+<p>qiuzhi_title varchar(100) not null,</p>
+<p>qiuzhi_content varchar(100) not null,</p>
+<p>pub_time date,</p>
+<p>primary key(qiuzhi_id)</p>
+<p>)ENGINE=InnoDB DEFAULT CHARSET=utf8;</p>
+<p>查看此数据表</p>
+<p>desc qiuzhi;</p>
+<p>查看创建此表的配置文件</p>
+<p>show create table qiuzhi;</p>
+<p>往数据表中增加列</p>
+<p>alter table + 表名 add 列名 列类型 列参数 ;</p>
+<p>新增加的列默认放在数据表的最后面</p>
+<p>alter table + 表名 add 列名 列类型 列参数 first;</p>
+<p>alter table qiuzhi add qiuzhi_jieguo varchar(100) not null;</p>
+<p>删除列</p>
+<p>alter table 表名 drop 列名;</p>
+<p>删除数据表</p>
+<p>drop table 表名;</p>
+<p>读取数据表</p>
+<p>select * from 表名；</p>
+<p>数据操作</p>
+<p>插入数据</p>
+<p>insert into 表名(field1,field2,…) values (values1,values2,…)</p>
+<p>insert into qiuzhi</p>
+<p>(qiuzhi_id,qiuzhi_title,qiuzhi_content,pub_time)</p>
+<p>values</p>
+<p>(1,’test’,’testtest’,’2020-08-28’);</p>
+<p>查询所有数据</p>
+<p>select * from 表名;</p>
+<p>查询某个数据</p>
+<p>select qiuzhi_title from 表名；</p>
+<p>条件查询</p>
+<p>where操作符</p>
+<p>select qiuzhi_content from qiuzhi where qiuzhi_title='test';</p>
+<p>条件模糊查询</p>
+<p>like操作符</p>
+<p>select * from qiuzhi where qiuzhi_title like 'tes%';</p>
+<p>更新数据</p>
+<p>update qiuzhi set qiuzhi_title='test1' where qiuzhi_id=1;</p>
+<p>删除数据</p>
+<p>delete from qiuzhi where qiuzhi_id=1;</p>
+<p>分组查询</p>
+<p>group by操作符</p>
+<p><img src="images/SQL/clip_image001.png" alt="img" /></p>
+<p>联合查询</p>
+<p>union操作符可以联合多个select查询</p>
+<p>select qiuzhi_title from qiuzhi union select pub_time from qiuzhi;</p>
+<p>查询后排序</p>
+<p>order by</p>
+<p>select * from qiuzhi order by pub_time;</p>
+<p>insert into user_information</p>
+<p>(username,password,add_time)</p>
+<p>values</p>
+<p>('admin','admin123','2016-09-24');</p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

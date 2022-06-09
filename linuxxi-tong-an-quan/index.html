@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Linux系统安全</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>21 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2021-06-23
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <h1 id="linuxxi-tong-an-quan-zhi-shi-ti">Linux系统安全知识体</h1>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624467435499-cf4590b9-792e-4e9d-a80f-8ceb458d7755.png#align=left&amp;display=inline&amp;height=504&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=1008&amp;originWidth=1694&amp;size=557128&amp;status=done&amp;style=none&amp;width=847" alt="image.png" /></p>
+<h1 id="yi-zhang-hu-an-quan">一·账户安全</h1>
+<p>在Linux系统中，提供了多种机制来确保用户账号的正确，安全使用。合理地规划用户账号，并合理地分配权限，是保证Linux系统安全的第一步。</p>
+<span id="continue-reading"></span><h2 id="1-zhang-hu-de-ji-ben-gai-nian">1·账户的基本概念</h2>
+<h3 id="a-zhang-hu-de-xiang-guan-gai-nian">a·账户的相关概念</h3>
+<ul>
+<li>用户：用户是能够获取系统资源的权限的集合。</li>
+<li>组：组是权限的容器。</li>
+<li>用户和组的特性：
+<ul>
+<li>用户必须属于某个组或多个组中。</li>
+<li>用户和组为多对多关系。</li>
+<li>root用户为最高权限用户</li>
+</ul>
+</li>
+<li>用户的类型：
+<ul>
+<li>超级用户：用户名为root或UID为0的用户，可以修改系统中所有的文件。</li>
+<li>系统用户：Linux系统正常工作所必须的内建的用户，不能用来登陆，如：bin, adm, lp等。</li>
+<li>普通用户：一般使用的用户，为了业务而生。</li>
+</ul>
+</li>
+</ul>
+<h3 id="b-zhang-hu-de-xiang-guan-wen-jian">b·账户的相关文件</h3>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624467688451-2d704116-0d70-4b2e-b994-5415858a8937.png#align=left&amp;display=inline&amp;height=321&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-24%20%E4%B8%8A%E5%8D%8812.59.44.png&amp;originHeight=742&amp;originWidth=640&amp;size=235247&amp;status=done&amp;style=none&amp;width=277" alt="截屏2021-06-24 上午12.59.44.png" /></p>
+<ul>
+<li>用户信息文件：
+<ul>
+<li>/etc/passwd</li>
+<li>/etc/shadow </li>
+</ul>
+</li>
+<li>组信息文件：
+<ul>
+<li>/etc/group</li>
+<li>/etc/gshadow</li>
+</ul>
+</li>
+</ul>
+<h4 id="etc-passwd">/etc/passwd</h4>
+<p>系统识别用户的文件，所有用户的信息都在文件中记录。</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>admin:x:500:500:admin ad:/home/admin:/bin/bash
+</span><span>
+</span><span>第一字段：用户名（也被称为登录名）。
+</span><span>第二字段：口令；上例为x，实际上密码已经被映射到/etc/shadow文中。
+</span><span>第三字段：UID；用户ID。
+</span><span>第四字段：GID；用户组ID。
+</span><span>第五字段：用户名全称，可选，可以不设置。
+</span><span>第六字段：用户的家目录所在的位置。
+</span><span>第七字段：用户所用shell的类型。
+</span></code></pre>
+<h4 id="etc-shadow">/etc/shadow</h4>
+<p>passwd的影子文件，两文件互补</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>admin:$1$VE.Bq2Xf$2ccQi7EQ9dp8GKF8gH7PB1:13072:0:99999:7:::
+</span><span>
+</span><span>第一字段：用户名（也被称为登录名）。
+</span><span>第二字段：密码（已被加密）。
+</span><span>第三字段：上次修改口令的时间（从1970年1月1日起的天数）。
+</span><span>第四字段：两次修改口令间隔最少的天数。
+</span><span>第五字段：两次修改口令间隔最多的天数。
+</span><span>第六字段：提前多少天警告用户口令将过期。
+</span><span>第七字段：在口令过期之后多少天禁用此用户。
+</span><span>第八字段：用户过期日期。
+</span><span>第九字段：保留字段，目前为空。
+</span></code></pre>
+<h4 id="etc-group">/etc/group</h4>
+<p>具有共同特性的用户集合起来就是用户组</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>root:x:0:root,linuxsir,baz
+</span><span>
+</span><span>第一字段：用户组名称。
+</span><span>第二字段：用户组密码。
+</span><span>第三字段：GID。
+</span><span>第四字段：用户列表，每个用户之间用英文逗号分割。
+</span></code></pre>
+<h4 id="etc-gshadow">/etc/gshadow</h4>
+<p>/etc/group的加密文件</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>groupname:password:admin,admin,...:member,member,...
+</span><span>
+</span><span>第一字段：用户组。
+</span><span>第二字段：用户组密码。
+</span><span>第三字段：用户组管理者。
+</span><span>第四字段：用户组成员。
+</span></code></pre>
+<h3 id="c-zhang-hu-ren-zheng-fang-shi">c·账户认证方式</h3>
+<p>本地认证、远程认证。</p>
+<ul>
+<li>用户名+密码（SSH、Telnet、FTP）。</li>
+<li>基于证书。</li>
+<li>PAM（Pluggable Authentication Modules）</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624467766983-210233f5-7bc9-479a-a1ec-6254bc374f72.png#align=left&amp;display=inline&amp;height=254&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=508&amp;originWidth=810&amp;size=262688&amp;status=done&amp;style=none&amp;width=405" alt="image.png" /></p>
+<h3 id="d-zhang-hu-fang-wen-wen-jian-quan-xian-fen-pei">d·账户访问文件权限分配</h3>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>drwxr-xr-x 2 root root 637 Sep 19 03:23 config
+</span><span>
+</span><span>d：文件类型：d文件夹，-文件。
+</span><span>rwx：文件拥有者的权限（U）。
+</span><span>r-x：文件拥有者所在组其他用户的权限（G）。
+</span><span>r-x：系统中其他用户的权限（O）。
+</span><span>2：链接数。
+</span><span>root：文件拥有者UID。
+</span><span>root：文件拥有者GID。
+</span><span>673：文件大小。
+</span><span>Sep 19 03:23：最后修改时间。
+</span><span>config：文件名。
+</span></code></pre>
+<h4 id="quan-xian-biao-shi-fang-shi">权限表示方式</h4>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624467829710-9211d308-68bd-4e07-9ac4-52a37d54d2fa.png#align=left&amp;display=inline&amp;height=254&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=508&amp;originWidth=1318&amp;size=532634&amp;status=done&amp;style=none&amp;width=659" alt="image.png" /><br />r、w、x分别表示读、写、执行。<br />r、w、x分别可以用4、2、1表示。<br />例如：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">chmod</span><span> 777 config    </span><span style="color:#65737e;">#给文件设置权限
+</span><span style="color:#bf616a;">chmod</span><span> u=rwx config    </span><span style="color:#65737e;">#给文件设置权限
+</span></code></pre>
+<p>特殊权限：<br />SUID/SGID/SBIT<br />/usr/bin/passwd这个文件的权限状态是：“-rwsr-xr-x”</p>
+<h2 id="2-zhang-hu-feng-xian-yu-an-quan-ce-lue">2·账户风险与安全策略</h2>
+<h3 id="a-shen-fen-jian-bie">a·身份鉴别</h3>
+<h4 id="te-quan-yong-hu-de-pai-cha">特权用户的排查：</h4>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">awk -F</span><span>: &#39;</span><span style="color:#a3be8c;">($3==0){print$1}</span><span>&#39; /etc/passwd
+</span></code></pre>
+<p>结果中不能出现root以外的UID为0的用户。<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624467859366-ef649a28-830e-4f37-8c7e-1e7d7684017f.png#align=left&amp;display=inline&amp;height=57&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=114&amp;originWidth=916&amp;size=64258&amp;status=done&amp;style=none&amp;width=458" alt="image.png" /><br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624467877021-00313415-d9cb-4ceb-ac26-4f20c134b1f2.png#align=left&amp;display=inline&amp;height=245&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=490&amp;originWidth=896&amp;size=137764&amp;status=done&amp;style=none&amp;width=448" alt="image.png" /></p>
+<h4 id="zhang-hao-mi-ma-sheng-ming-zhou-qi">账号密码生命周期</h4>
+<p>对于采用静态口令认证的服务器，账户密码生命周期应小于90，且拒绝弱口令以及空口令。</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">more</span><span> /etc/login.defs    </span><span style="color:#65737e;">#检查相关参数
+</span></code></pre>
+<p>建议设置如下内容：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>PASS_MAX_DAYS 90    #新建用户的密码最长使用天数
+</span><span>PASS_MIN_DAYS 0    #新建用户的密码最短使用天数
+</span><span>PASS_WARN_AGE 7    #新建用户的密码到期提前提醒天数
+</span></code></pre>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624467916584-bdbee4b1-98a0-4c04-9329-f9862b477149.png#align=left&amp;display=inline&amp;height=155&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=310&amp;originWidth=1146&amp;size=59605&amp;status=done&amp;style=none&amp;width=573" alt="image.png" /></p>
+<h4 id="mi-ma-qiang-du">密码强度</h4>
+<p>对于采用静态口令认证技术的设备，口令长度至少8位，并包括数字、小写字母、大写字母和特殊符号4类中至少2类。<br />/etc/pam.d/system-auth文件中配置：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>password requisite pam_cracklib.so difok=3 minlen=8 ucredit=-1 lcredit=-1 dcredit=-1
+</span></code></pre>
+<p>至少8位，包含一位大写字母，一位小写字母和一位数字</p>
+<h4 id="yong-hu-suo-ding">用户锁定</h4>
+<p>对于采用静态口令认证技术的设备，应配置当用户连续认证失败次数超过10次，锁定该用户使用的账号。<br />设置连续输错10次密码，账号锁定5分钟，使用如下命令修改配置文件</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">vi</span><span> /etc/pam.d/system-auth
+</span></code></pre>
+<p>添加</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>auth required pam_tally.so onerr=fail deny=10 unlock_time=300
+</span></code></pre>
+<p>注：解锁用户：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">faillog -u </span><span>&lt;用户名&gt; -r
+</span></code></pre>
+<h3 id="b-fang-wen-kong-zhi">b·访问控制</h3>
+<h4 id="umaskan-quan-pei-zhi">umask安全配置</h4>
+<p>检查umask的值是否是027:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">vi</span><span> /etc/login.defs
+</span></code></pre>
+<p>默认情况下umask的值是022（能够用umask命令查看）。<br />此时建立的文件默认权限是644（6-0，6-2，6-2），建立的文件夹默认权限是755（7-0，7-2，7-2）。<br />022表示默认创建新文件夹权限为755 也就是 rxwr-xr-x（所有者全部权限，属组读写，其它人读写）<br />027表示默认创建新文件夹权限为750 也就是rxwr-x---(所有者全部权限，属组读写，其它人无)</p>
+<h4 id="zhong-yao-mu-lu-quan-xian">重要目录权限</h4>
+<p>执行以下命令检查目录和文件的权限设置情况：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">ls -l</span><span> /etc/
+</span><span style="color:#bf616a;">ls -l</span><span> /etc/rc.d/init.d/
+</span><span style="color:#bf616a;">ls -l</span><span> /tmp/
+</span><span style="color:#bf616a;">ls -l</span><span> /etc/inetd.conf
+</span><span style="color:#bf616a;">ls -l</span><span> /etc/passwd
+</span><span style="color:#bf616a;">ls -l</span><span> /etc/shadow
+</span><span style="color:#bf616a;">ls -l</span><span> /etc/group
+</span><span style="color:#bf616a;">ls -l</span><span> /etc/security
+</span><span style="color:#bf616a;">ls -l</span><span> /etc/sevices
+</span><span style="color:#bf616a;">ls -l</span><span> /rc*.d
+</span></code></pre>
+<p>对于重要目录，建议执行如下操作：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">chmod -R</span><span> 750 /etc/rc.d/init.d/*
+</span></code></pre>
+<p>这样只有root可以读、写和执行这个目录下的脚本。</p>
+<h4 id="cha-kan-wei-shou-quan-de-suid-sgid">查看未授权的SUID/SGID</h4>
+<p>SUID/SGID的程序在运行时，将有效用户ID改变为该程序的所有者（组）ID。因而可能存在一定的安全隐患，经常性的对比SUID/SGID文件列表，以便能够及时发现可疑的后门程序。<br />找出系统中所有含S位的程序，把不必要的S位去掉，或者把根本不用的直接删除，这样可以防止用户滥用及提升权限的可能性，命令如下：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">FIND</span><span> /</span><span style="color:#bf616a;"> -TYPE</span><span> F PERM</span><span style="color:#bf616a;"> -4000 -LS    </span><span style="color:#65737e;">#查找SUID可执行程序
+</span><span style="color:#bf616a;">FIND</span><span> /</span><span style="color:#bf616a;"> -TYPE</span><span> F PERM</span><span style="color:#bf616a;"> -2000 -LS    </span><span style="color:#65737e;">#查找SGID程序
+</span><span style="color:#bf616a;">FIND</span><span> /</span><span style="color:#bf616a;"> -TYPE</span><span> F PERM</span><span style="color:#bf616a;"> -6000 -LS    </span><span style="color:#65737e;">#查找SUID/SGID/两个都有
+</span></code></pre>
+<h3 id="c-an-quan-shen-ji">c·安全审计</h3>
+<h4 id="syslogdeng-lu-shi-jian-ji-lu">-syslog登陆事件记录</h4>
+<p>必须要记录所有的登陆事件，执行 <code>vim /etc/rsyslog.conf</code> ，查看是否有以下配置</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kern.warning</span><span>;</span><span style="color:#bf616a;">*.err</span><span>;</span><span style="color:#bf616a;">authpriv.none</span><span style="color:#96b5b4;">\t</span><span style="color:#bf616a;">@loghost
+</span><span style="color:#bf616a;">*.info</span><span>;</span><span style="color:#bf616a;">mail.none</span><span>;</span><span style="color:#bf616a;">authpriv.none</span><span>;</span><span style="color:#bf616a;">cron.none</span><span style="color:#96b5b4;">\t</span><span style="color:#bf616a;">@loghost
+</span><span style="color:#bf616a;">*.emerg</span><span style="color:#96b5b4;">\t</span><span style="color:#bf616a;">@loghost
+</span><span style="color:#bf616a;">local7.*</span><span style="color:#96b5b4;">\t</span><span style="color:#bf616a;">@loghost
+</span></code></pre>
+<h4 id="she-zhi-historyshi-jian-chuo">-设置history时间戳</h4>
+<p>在问题定位时，我们有时需要查看history命令记录，看是否有删除/移动文件、修改配置等误操作 为history命令添上时间记录，可便于分析、定位问题。修改方法如下：</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">vim</span><span> /etc/profile
+</span><span style="color:#b48ead;">export </span><span style="color:#bf616a;">HISTTIMEFORMAT</span><span>=</span><span style="color:#a3be8c;">“</span><span>%</span><span style="color:#bf616a;">F </span><span>%</span><span style="color:#bf616a;">T ‘whoami’”
+</span><span style="color:#bf616a;">执行source</span><span> /etc/profile生效
+</span></code></pre>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624468412637-4ccae778-f3a3-4948-8e4a-329319925159.png#align=left&amp;display=inline&amp;height=108&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=216&amp;originWidth=1684&amp;size=370091&amp;status=done&amp;style=none&amp;width=842" alt="image.png" /></p>
+<h3 id="d-zi-yuan-kong-zhi">d·资源控制</h3>
+<h4 id="deng-lu-chao-shi">-登陆超时</h4>
+<p>使用命令“vi /etc/profile”修改配置文件，添加“TMOUT=”行开头的注释，<br />建议设置为“TMOUT=180”，即超时时间为3分钟。</p>
+<h4 id="xian-zhi-deng-lu">-限制登录</h4>
+<ul>
+<li>禁止ROOT用户远程登陆
+<ul>
+<li>#CAT /ETC/SSH/SSHD_CONFIG</li>
+<li>确保PERMITROOTLOGIN为NO</li>
+</ul>
+</li>
+<li>限定信任主机
+<ul>
+<li>#CAT /ETC/HOSTS.EQUIV</li>
+<li>#CAT /$HOME/.RHOSTS</li>
+<li>查看上述两个文件中的主机，删除其中不必要的主机，防止存在多余的信任主机</li>
+<li>或直接关闭所有R系列远程服务
+<ul>
+<li>RLOGIN</li>
+<li>RSH</li>
+<li>REXEC</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>禁用TELNET,使用SSH进行管理
+<ul>
+<li>开启SSH服务：#SERVICE SSHD START</li>
+</ul>
+</li>
+<li>限制能够登录本机的IP地址
+<ul>
+<li>#VI /ETC/SSH/SSHD_CONFIG</li>
+<li>添加（或修改）：</li>
+<li>ALLOWUSERS <a href="mailto:MARGIN@10.1.1.3">MARGIN@10.1.1.3</a>
+<ul>
+<li>允许用户MARGIN通过地址10.1.1.3来登录本机</li>
+</ul>
+</li>
+<li>ALLOWUSERS <em>@10.1.</em>.*
+<ul>
+<li>仅允许10.1.0.0/16网段所有用户通过SSH访问。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="xiu-gai-sshduan-kou">-修改SSH端口</h4>
+<ul>
+<li>编辑/etc/ssh/sshd_config</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624469059169-91e3369d-a152-48d4-89b0-f4aa2a633468.png#align=left&amp;display=inline&amp;height=147&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=294&amp;originWidth=916&amp;size=229463&amp;status=done&amp;style=none&amp;width=458" alt="image.png" /></p>
+<ul>
+<li>修改banner信息
+<ul>
+<li>修改sshd_config
+<ul>
+<li>/etc/ssh/sshd_config</li>
+<li>如存在，则将banner字段设置为NONE</li>
+</ul>
+</li>
+<li>查看修改motd：
+<ul>
+<li>/etc/motd</li>
+<li>查看该文件内容，更新成自己想要添加的内容</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="e-ru-qin-fang-fan">e·入侵防范</h3>
+<ul>
+<li>Linux下的防火墙框架iptables
+<ul>
+<li>包过滤</li>
+<li>NAT</li>
+<li>数据包处理</li>
+</ul>
+</li>
+<li>Iptables 语法
+<ul>
+<li>Iptables [-t table] command [match][target]</li>
+</ul>
+</li>
+<li>Iptables 应用
+<ul>
+<li>iptables -I INPUT -s 192.168.1.0/24 -p tcp --dport 22 -j ACCEPT</li>
+</ul>
+</li>
+</ul>
+<h1 id="er-wen-jian-xi-tong-an-quan">二·文件系统安全</h1>
+<h2 id="1-wen-jian-xi-tong-ge-shi">1·文件系统格式</h2>
+<ul>
+<li>Linux文件系统</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624470033494-5c79344d-b0b1-4dd6-aaff-2c48510ab7c4.png#align=left&amp;display=inline&amp;height=279&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=558&amp;originWidth=1224&amp;size=227402&amp;status=done&amp;style=none&amp;width=612" alt="image.png" /></p>
+<ul>
+<li>文件系统类型
+| <strong>文件系统类型</strong> | <strong>文件系统说明</strong> |
+| --- | --- |
+| Ext | 第一个专门针对liunx的文件系统 |
+| Ext2 | 为解决ext文件系统缺陷设计的高性能、可扩展的文件系统 |
+| Ext3 | 日志文件系统，ext2的升级版 |
+| Ext4 | Ext4提供了更为可靠性的功能 |
+| swap | Linux的交换分区 |
+| NFS | Linux的网络文件系统 |
+| smb | 支持smb协议的网络文件系统 |
+| vfat | 与windows系统兼容的linux文件系统 |
+| ntfs | windowsNT所采用的独特的文件系统结构 |
+| proc | Linux操作系统中的一种基于内存的伪文件系统 |
+| xfs | 由SGI开发的一个全64位、快速、安全的日志文件系统 |</li>
+</ul>
+<h2 id="2-an-quan-fang-wen-he-quan-xian-she-zhi">2·安全访问和权限设置</h2>
+<ul>
+<li>文件和目录安全</li>
+</ul>
+<p>确保重要目录的权限设置，限制用户访问</p>
+<ul>
+<li>排查任何人都有写权限的目录</li>
+</ul>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">find</span><span> /</span><span style="color:#bf616a;"> -xdev -type</span><span> f </span><span style="color:#96b5b4;">\(</span><span style="color:#bf616a;"> -perm -0002 -a</span><span> !</span><span style="color:#bf616a;"> -perm -1000 </span><span style="color:#96b5b4;">\)</span><span> –print
+</span><span style="color:#bf616a;">find</span><span> /</span><span style="color:#bf616a;"> -xdev -type</span><span> d </span><span style="color:#96b5b4;">\(</span><span style="color:#bf616a;"> -perm -0002 -a</span><span> !</span><span style="color:#bf616a;"> -perm -1000 </span><span style="color:#96b5b4;">\)</span><span style="color:#bf616a;"> -print
+</span></code></pre>
+<ul>
+<li>配置默认的umask值：027</li>
+<li>检查未授权的SGID/SUID</li>
+</ul>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">find</span><span> /</span><span style="color:#bf616a;"> -type</span><span> f</span><span style="color:#bf616a;"> -perm -6000 -ls
+</span></code></pre>
+<ul>
+<li>文件目录权限</li>
+</ul>
+<p>目录权限设置：chmod [-cfvR] filename<br />DEMO：chmod 750 /home/margin/config<br />更改所有者和所有组：chown [-cfhvR] user[:group] filename<br />DEMO：chown margin:margingroup /home/margin/config</p>
+<h1 id="san-ri-zhi-fen-xi">三·日志分析</h1>
+<h2 id="1-xi-tong-ri-zhi-de-fen-lei-linuxri-zhi">1·系统日志的分类-Linux日志</h2>
+<ul>
+<li>日志文件系统已经成为linux系统不可缺失的部分。对于日常服务器的运行状态是否正常、遭受攻</li>
+</ul>
+<p>击时如何查找被攻击的痕迹等情况，linux日志系统都提供了相应的解决方案。</p>
+<ul>
+<li>日志系统可以记录当前系统中发生的各种事件，比如登录日志记录每次登录的来源和时间、系统 每次启动 和关闭的情况、系统错误等。</li>
+</ul>
+<p>日志的主要用途:</p>
+<ol>
+<li>系统审计：记录登录系统的用户和日常行为</li>
+<li>监测追踪：系统遭受到攻击时如何追踪溯源到攻击者</li>
+<li>分析统计：系统的性能、错误等统计</li>
+</ol>
+<ul>
+<li>/var/log/messages
+<ul>
+<li>这是Linux最核心的日志文件，假若某个服务没有定义日志文件，那么该服务产生的日志文件就会记录到这个文件中， 该日志每周归档一次，默认只保留5次。归档的方法都是由“/etc/logrotate.conf”这个文件来控制的</li>
+</ul>
+</li>
+<li>/var/log/wtmp
+<ul>
+<li>查看用户的登录，注销信息，同时记录系统的启动，重启，关机等事件。不用能cat直接查看，必须用last查看</li>
+</ul>
+</li>
+<li>/var/log/btmp
+<ul>
+<li>和wtmp类似，也不能用cat直接查看，用lastb查看，记录用户登录无效的历史</li>
+</ul>
+</li>
+<li>/var/log/maillog
+<ul>
+<li>用来记录邮件相关的日志，比如发给哪个，是否发出去</li>
+</ul>
+</li>
+<li>/var/log/cron
+<ul>
+<li>记录了系统定时任务相关的日志</li>
+</ul>
+</li>
+<li>/var/log/cpus/
+<ul>
+<li>记录了cpu信息的日志</li>
+</ul>
+</li>
+<li>/var/log/lastlog
+<ul>
+<li>记录所有用户的最后一次登录时间，只可能通过lastlog命令查看</li>
+</ul>
+</li>
+<li>/var/log/sudo.log
+<ul>
+<li>记录使用sudo发出的命令，需要先配置/etc/sudoers 的 logfile=/var/log/sudo.log</li>
+</ul>
+</li>
+<li>/var/log/maillog
+<ul>
+<li>用来记录邮件相关的日志，比如发给哪个，是否发出去</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-ri-zhi-wen-jian-guan-li">2·日志文件管理</h2>
+<ul>
+<li>日志文件中的信息可能比较繁琐，但有时特别重要。比如，硬件故障，错误配置，网络入侵等 情况发生时，通过查看日志文件可以很轻松地定位问题所在。</li>
+<li>你必须经常清空日志文件，去掉旧信息，以免磁盘占满。正确管理日志文件，可使我们需要日志文件时能够访问到。清空日志文件时另作备分可使你获得更多审计信息。</li>
+<li>这些管理工作看起来很枯燥无味， logrotate可以帮助我们。</li>
+</ul>
+<h2 id="3-ri-zhi-fen-xi-gong-ju">3·日志分析工具</h2>
+<ul>
+<li>Logrotate
+<ul>
+<li>logrotate 是操作系统用来管理日志的工具，支持日志的切割、压缩、清理以及邮件报警等，通过 crontab 服务定时运行，也可以用这个工具来管理我们自己的服务日志，只需要简单配置下 配置文件即可</li>
+</ul>
+</li>
+<li>Logrotate使用方法
+<ol>
+<li>默认配置文件路径：/etc/logrotate.conf（也可自定义配置文件，启动时加载即可）</li>
+<li>单次执行测试：logrotate -f /etc/logrotate.conf</li>
+<li>定时执行：/etc/crontab */5 * * * * root /sbin/logrotate /etc/logrotate.conf 5分钟执行一次</li>
+</ol>
+</li>
+<li>Logrotate配置
+<ul>
+<li>logrotate的配置可分为系统默认配置文件和自定义配置文件，默认配置文件的路径： /etc/logrotate.conf  如果要自定义，可以将配置文件写到/etc/logrotate.d/中，/etc/logrotate.conf会引入。</li>
+</ul>
+</li>
+<li>Logrotate配置参数</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624471408443-0fea71ec-ede1-4174-86e1-e78cb24e3b22.png#align=left&amp;display=inline&amp;height=183&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=366&amp;originWidth=1104&amp;size=142243&amp;status=done&amp;style=none&amp;width=552" alt="image.png" /></p>
+<p>rotate:保留多少个历史文件 Weekly:每周执行  Missingok:忽略文件缺失信息<br />notifempty:如果文件为空，不切分文件<br />delaycompress:转存的文件下一次转存时压缩<br />sharedscripts:postrotate脚本只执行一次<br />postrotate/endscript:切割后执行的命令</p>
+<h2 id="4-ri-zhi-ge-shi">4·日志格式</h2>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624471580433-27dd120f-b443-4555-85d6-b41f303249e1.png#align=left&amp;display=inline&amp;height=106&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=212&amp;originWidth=2011&amp;size=496701&amp;status=done&amp;style=none&amp;width=1005.5" alt="image.png" /><br />对于文本类型的日志，每一行表示一个消息，由4部分的固定格式组成</p>
+<ol>
+<li>记录时间:表示消息日期和时间</li>
+<li>主机名:表示生成消息的服务器的名字</li>
+<li>生成消息的子系统的名字:来自进程标识进程，方括号中表示进程的PID</li>
+<li>消息:剩下的部分表示消息的内容</li>
+</ol>
+<h2 id="5-ri-zhi-fen-xi">5·日志分析</h2>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624471866242-057c6ea0-7905-4c4c-90be-fbf403b26aaf.png#align=left&amp;display=inline&amp;height=101&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-24%20%E4%B8%8A%E5%8D%882.09.30.png&amp;originHeight=188&amp;originWidth=1574&amp;size=102593&amp;status=done&amp;style=none&amp;width=847" alt="截屏2021-06-24 上午2.09.30.png" /></p>
+<ul>
+<li>查看系统中的用户：cat /etc/passwd | grep /bin/bash</li>
+<li>登录用户和登录时候用的IP w</li>
+<li>查询历史命令 history</li>
+<li>分析登录IP，在wtmp中</li>
+<li>分析历史命令，在history中</li>
+<li>另外定时任务，sudo.log都要排查</li>
+</ul>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1624471958804-9f688cb8-8b6b-41e0-85fa-06184daaadf2.png#align=left&amp;display=inline&amp;height=229&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=457&amp;originWidth=1136&amp;size=502075&amp;status=done&amp;style=none&amp;width=568" alt="image.png" /></p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

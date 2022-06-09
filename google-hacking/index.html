@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Google Hacking</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>5 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2020-09-04
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <h1 id="google-hacking">Google Hacking</h1>
+<p><code> +</code>相当于逻辑与</p>
+<p><code>|</code>相当于逻辑或</p>
+<span id="continue-reading"></span>
+<p><code>-</code>相当于逻辑非（排除）</p>
+<p><code>*</code>通配符，匹配任意字符</p>
+<p><code>~</code>包含同义词或类似单词</p>
+<p><code>.</code>匹配单个字符进行查询</p>
+<p><code>“ ”</code>精准匹配双引号内容</p>
+<p><code>@</code>用于搜索社交媒体的字体前可以加上@</p>
+<p><code>..</code>在数字之间加上 .. 表示在数字范围内搜索</p>
+<p><code>site:</code>指定域名搜索相关内容</p>
+<p><code>intitle:</code>搜索标题中存在特定关键词的网页</p>
+<p><code>allintitle:</code>搜索标题中存在特定关键词的网页</p>
+<p><code>inurl:</code>搜索url中存在特定关键词的网页</p>
+<p><code>allinurl:</code>搜索url中存在特定关键词的网页</p>
+<p><code>intext:</code>搜索正文存在特定关键词的网页</p>
+<p><code>filetype:</code>指定文件类型</p>
+<p><code>link:</code>显示链接到指定URL的网页列表</p>
+<p><code>inanchor</code>搜索网站锚点（https://zhuanlan.zhihu.com/p/28679912、https://www.cnblogs.com/littlek1d/p/9548075.html）</p>
+<p>【问】asp, jsp, php 是什么？</p>
+<p><code>related:</code>搜索与关键词相似的网站</p>
+<p><code>cache:</code></p>
+<p><code>define:</code></p>
+<p>【综合应用】</p>
+<p>搜索网站后台</p>
+<p>搜索可遍历目录的网站文件</p>
+<p>查找网站特殊目录</p>
+<p>https://www.hacking8.com/uploadfile/wLHK-Discuz%E6%BC%8F%E6%B4%9E%E6%95%B4%E7%90%86.pdf</p>
+<p>https://www.cvedetails.com/</p>
+<p>https://packetstormsecurity.com/</p>
+<p>http://www.jeepxie.net/article/165709.html</p>
+<p>敏感信息（简历、邮箱、用户名、密码等）</p>
+<p>敏感目录（后台地址、备份文件、日志文件等）</p>
+<p>摄像头</p>
+<p>包含漏洞的地址</p>
+<p>使用特定软件特定版本的站点</p>
+<p>事件性漏洞</p>
+<p>通用性漏洞</p>
+<p>如何防御：</p>
+<ul>
+<li>禁止访问未授权的目录或文件
+<ul>
+<li>给目录添加密码保护或者设置严格的读取权限
+<ul>
+<li>.htaccess可以用来防止目录的内容未授权的访问，但是不当的配置还会让这个文件可见甚至可读</li>
+<li>在Apache的服务器上可以通过httpd.conf文件中的单词indexs前添加一个连字符或者减号来禁止目录列表</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>添加robots.txt</li>
+<li>添加NOARCHIVE</li>
+<li>使用NOSNIPET</li>
+<li>加密敏感信息</li>
+<li>向Google申诉</li>
+</ul>
+<p>【问】robots.txt的作用？</p>
+<p>【问】与robots.txt有关的问题是什么？</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>常用 shodan 库函数 </span><span>
+</span><span>shodan.Shodan(key) ：初始化连接API </span><span>
+</span><span>Shodan.count(query, facets=None)：返回查询结果数量 </span><span>
+</span><span>Shodan.host(ip, history=False)：返回一个IP的详细信息 </span><span>
+</span><span>Shodan.ports()：返回Shodan可查询的端口号 </span><span>
+</span><span>Shodan.protocols()：返回Shodan可查询的协议 </span><span>
+</span><span>Shodan.services()：返回Shodan可查询的服务 </span><span>
+</span><span>Shodan.queries(page=1, sort=&#39;timestamp&#39;, order=&#39;desc&#39;)：查询其他用户分享的查询规则 </span><span>
+</span><span>Shodan.scan(ips, force=False)：使用Shodan进行扫描，ips可以为字符或字典类型 </span><span>
+</span><span>Shodan.search(query, page=1,limit=None, offset=None, facets=None, minify=True)：查询Shodan数据</span><span>
+</span></code></pre>
+<p>另：zoomeye   https://www.zoomeye.org/doc?channel=api</p>
+<p>​		FOFA      https://fofa.so/help	https://fofa.so/rules/library   https://fofa.so/library</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>网站模块</span><span>
+</span><span>pagespeed， mod_bwlimited， mod_auth_passthrough， mod_auth_pam， mod_fastcgi， mod_jk， mod_perl， mod_python， mod_rack， mod_rails， mod_ssl， mod_wsgi， mod_antiloris，</span><span>
+</span><span>广告联盟</span><span>
+</span><span>doubleclick_ad， baidu广告联盟， Google_AdSense， Open_AdStream， adinfinity， adriver，</span><span>
+</span><span>反向代理服务器</span><span>
+</span><span>squid， kangle反向代理， Varnish， Aicache， SJSWPS_ OiWPS， HAProxy_Report，</span><span>
+</span><span>脚本语言</span><span>
+</span><span>PHP， ASP.NET， python， ruby， jsp， perl， nodejs， ASP，</span><span>
+</span><span>前端库</span><span>
+</span><span>jquery， bootstrap， d3， jquery-ui， yui， AlloyUI，</span><span>
+</span><span>分享模块</span><span>
+</span><span>jiathis， ujian， 百度分享， joomla-facebook， addthis， hellobar，</span><span>
+</span><span>路由器</span><span>
+</span><span>百为路由， 锐捷NBR路由器， mikrotik， 中兴路由器， h3c路由器， jcg无线路由器， D-Link_VoIP_Wireless_Router， arrisi_Touchstone， ZyXEL， Ruckus， Motorola_SBG900， Wimax_CPE， Cisco_Cable_Modem， Scientific-Atlanta_Cable_Modem， rap， ZTE_MiFi_UNE， DI-804HV， HuaweiHomeGateway， TP-LINK无线路由器，</span><span>
+</span><span>云评论</span><span>
+</span><span>uyan， disqus，</span><span>
+</span><span>统计模块</span><span>
+</span><span>google-analytics， cnzz， baidu统计， 51la， CNZZ统计， awstats_misc_tracker， advancedwebstats， hubspot， 51yes， Piwik，</span><span>
+</span><span>开发框架</span><span>
+</span><span>ThinkPHP， Swiftlet， Aspnetmvc， CodeIgniter， ColdFusion， WebObjects， cakephp， Django， zikula_framework， NetteFramework， Fat-FreeFramework， Play-Framework， Restlet-Framework， Kohana-Framework， flow_framework， SIMIT_framework， axis2-web，</span><span>
+</span><span>其他</span><span>
+</span><span>mongodb， elasticsearch， phpMyadmin， MVB2000， GPSweb， Tumblr， phpinfo， AD_RS设备， FrontPageServerExtension， 认证页面， TCN协议， sharepoint， MS-Author-Via， 3COM_NBX， wspx， rack-cache， Dnnoutputcache， Iisexport， Oraclea-DMS， P3p_enabled， X-72e-Nobeian-Transfer， ManagedFusion， Adblock， Blackboard， LiquidGIS， Cocoon， Wp-Super-Cache， pagespeed， Alternate-Protocol， unbouncepages， lemis管理系统， OpenSSL， mod_bwlimited， mod_auth_passthrough， FreeboxOS， SMA_Sunny_Webbox， Wimax_CPE， Aethra_Telecommunications_Operating_System， Scientific-Atlanta_Cable_Modem， rap， ZTE_MiFi_UNE， 用友商战实践平台， moosefs， AirLink_modem， CCProxy， APC_Management， HuaweiHomeGateway， TP-LINK无线路由器， 蓝盾BDWebGuard， 护卫神网站安全系统， phpDocumentor， ColdFusion， Adobe_ CQ5， Adobe_GoLive， Adobe_RoboHelp， Amaya， PHP-CGI， Synology_NAS， OpenMas， __VIEWSTATE， Chromelogger， Communique， recaptcha， IPFire， TerraMaster， 创星伟业校园网群， 正方教务管理系统， UFIDA_NC， 北创图书检索系统， Facebook_insights， sq</span><span>
+</span></code></pre>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

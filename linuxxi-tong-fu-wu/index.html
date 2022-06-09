@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Linux系统服务</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>9 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2020-08-03
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <p>常见Linux服务</p>
+<p>SSH服务</p>
+<p>查看ssh服务有没有开启：ps -e |grep ssh</p>
+<p>如果服务没有运行，通过命令 service ssh start、/etc/init.d/ssh start启动</p>
+<span id="continue-reading"></span>
+<p>如果没有安装，通过命令apt install openssh-server来安装</p>
+<p>如果安装成功，服务也开启成功，通过在客户端输入 ssh <a href="mailto:username@x.x.x.x">username@x.x.x.x</a>来登录</p>
+<p>如果登录不成功，需要修改服务端ssh的配置</p>
+<p>Vi /etc/ssh/sshd_config</p>
+<p>将 #permitRootLogin 取消掉注释，并设置为yes</p>
+<p>完成之后重启ssh服务</p>
+<p>/etc/init.d/ssh restart</p>
+<p>然后再去使用客户端连接。</p>
+<p>FTP服务</p>
+<p>安装FTP服务（vsftpd）</p>
+<p>apt install vsftpd</p>
+<p>开启vsftpd服务</p>
+<p>查看vsftpd服务有没有启动</p>
+<p>在home路径下创建一个文件夹ftpfile，用来进行FTP的上传下载</p>
+<p>Mkdir /home/ftpfile</p>
+<p>创建好之后，修改文件夹权限为777</p>
+<p>Chmod -R 777 /home/ftpfile</p>
+<p>Ls -l查看权限</p>
+<p>修改FTP配置</p>
+<p>Vi /etc/vsftpd.conf，有些语句修改的时候只需要去掉注释</p>
+<p>listen=YES</p>
+<p>local_enable=YES 是否允许本地用户登录ftp</p>
+<p>anonymous_enable=YES 匿名用户是否允许登录ftp</p>
+<p>chroot_local_user=YES</p>
+<p>local_root=/home/ftpfile/</p>
+<p>write_enable=YES</p>
+<p>local_umask=022</p>
+<p>anon_upload_enable=YES</p>
+<p>anon_mkdir_write_enable=YES</p>
+<p>local_root=DIR 本地用户访问时默认工作目录</p>
+<p>allow_writeable_chroot=YES</p>
+<p>注释掉 listen_ipv6</p>
+<p>重启服务进行登录</p>
+<p>可以测试一下，使用匿名用户登录</p>
+<p>apache服务：</p>
+<p>最流行的web服务端的软件之一，适用于中小型网站，开源的网页服务。</p>
+<p>安装：apt install apache2</p>
+<p>查看服务状态：/etc/init.d/apache2 status</p>
+<p>启动服务：/etc/init.d/apache2 start</p>
+<p>查看进程：ps -e | grep apache2</p>
+<p>测试：浏览器输入kali的IP，如果能看到apache2的页面，就说明安装成功</p>
+<p>（因为之前用过浏览器的代理，所以需要先关闭代理）</p>
+<p>apache2的安装路径在 /etc/apache2</p>
+<p>apache2.conf：全局配置文件</p>
+<p>envvars：存放环境变量（一般不需要修改）</p>
+<p>ports.conf：HTTP服务的端口</p>
+<p>httpd.conf：用户的配置文件</p>
+<p>默认情况下，apache会把网站的文件存放在/etc/www目录下</p>
+<p>需要将html的文档放在/var/www/html/，然后通过浏览器访问</p>
+<p>如果没有test.html，就创建一个，并添加下面内容</p>
+<p>nginx服务：开源的支持高性能高并发的www服务器</p>
+<p>安装、开启服务、测试步骤同上</p>
+<p>需要注意一点，因为之前安装了apache2，所以在/var/www/html目录下已经生成了一个apache2的index.html文件，nginx会调用apache2的index.html文件，显示的是apache2的测试页，如果要查看nginx的测试页，浏览器里输入：IP/index.nginx-debian.html</p>
+<p>安装好nginx后，我们的前端文件要放在/var/www/html目录下，nginx的所有配置文件都在/etc/nginx下，程序文件在/usr/sbin/nginx，日志文件放在/var/log/nginx下</p>
+<p>tomcat服务：免费开源的web应用服务，中小型网站</p>
+<p>要使用tomcat要使用java环境，一般情况下kali自带java环境，通过命令java -version来查看</p>
+<p>tomcat的安装：</p>
+<p>先在官网下载后缀为tar.gz的安装包，之后在kali的/usr路径下创建文件夹tomcat，然后把安装包移动到/usr/tomcat下，然后修改tomcat文件夹的权限，然后进入目录/usr/tomcat/，解压安装包tar -zxvf + 安装包，解压之后就会出现一个arache-tomcat-8.5.57的目录，进入该目录，会有一个bin文件夹，其中有startup.sh的文件，编辑这个文件，在最后一行加入：</p>
+<p>#set java environment
+export JAVA_HOME=/usr/local/lib/jdk1.8.0_231
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:%{JAVA_HOME}/lib:%{JRE_HOME}/lib
+export PATH=${JAVA_HOME}/bin:$PATH</p>
+<p>#tomcat
+export TOMCAT_HOME=/usr/tomcat/apache-tomcat-8.5.54</p>
+<p>注意jdk的版本要和自己的电脑匹配</p>
+<p>最后运行startup.sh，命令是sudo ./startup.ssh</p>
+<p>测试：在浏览器中，输入http://IP:8080</p>
+<p>关闭tomcat，需要先在文件shutdown.sh对应位置，添加信息：</p>
+<p>#set java environment
+export JAVA_HOME=/usr/local/lib/jdk1.8.0_231
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:%{JAVA_HOME}/lib:%{JRE_HOME}/lib
+export PATH=${JAVA_HOME}/bin:$PATH</p>
+<p>#tomcat
+export TOMCAT_HOME=/usr/tomcat/apache-tomcat-8.5.54</p>
+<p>注：vsftpd的配置文件/etc/vsftpd.conf中&quot;listen=YES&quot;和&quot;listen_ipv6=YES&quot;是不能同时开启的。若要求同时支持ipv4和ipv6，只需要保留listen_ipv6即可。</p>
+<p>然后执行命令sudo ./shutdown.sh</p>
+<p>如果要打开html页面，要在webapps目录下创建一个目录（这个目录可以理解成一个网站的项目），然后再把test.html放进目录中，最后在浏览器中输入：
+http://IP:8080/test/test.html</p>
+<p>MySQL服务：是最流行的关系型数据库管理系统，再web方面mysql是最好的应用软件之一。</p>
+<p>特点：</p>
+<p>开源</p>
+<p>支持大型的数据库，可以处理上千万条记录的数据库</p>
+<p>使用的是标准的SQL数据语言</p>
+<p>跨平台支持，可以定制</p>
+<p>MySQL安装：</p>
+<p>在kali中，数据库使用的是mariaDB，其属于MySQL的一个分支</p>
+<p>apt install mariadb-server</p>
+<p>启动mariadb服务：/etc/init.d/mysql start</p>
+<p>查看是否启动成功：netstat -tap | grep mysql  ，如果是listen状态，那就说明启动成功</p>
+<p>接下来需要连接数据库：mysql -u root -p</p>
+<p>因为安装过程中没有设置密码，所以密码默认为空</p>
+<p>Linux安全配置</p>
+<ol>
+<li>
+<p>禁用用户和组</p>
+<p>当某些用户或者组不使用的时候，可以直接在passwd或者group文件中注释掉</p>
+<p>/etc/passwd            /etc/group</p>
+</li>
+<li>
+<p>禁用某些服务</p>
+<p>service xxx stop         /etc/init.d/xxx stop</p>
+</li>
+<li>
+<p>iptables设置(kali不可以直接使用iptables)</p>
+<p>可以当作Linux系统的防火墙，管理员可以通过设置规则，对进出iptables的数据包进行过滤（放行、拒绝、丢弃）</p>
+<p>先查看系统是否安装防火墙</p>
+<p>which iptables</p>
+<p>whereis iptables</p>
+<p>如果没有的话需要安装：sudo apt-get install ufw</p>
+<p>开启iptables：ufw enable</p>
+<p>关闭iptables：ufw disable</p>
+<p>配置防火墙策略：
+先打开kali 的apache2或者nginx服务，然后再本地使用浏览器访问web服务器，如果能访问成功，接下来再kali的ufw添加策略，拒绝掉http的流量。如果访问不成功，可能是ufw影响，所以先关闭ufw，则能正常访问，然后再开启ufw，设置http的放行策略。</p>
+<p>拒绝http流量，通过ufw deny http       ufw delete allow http</p>
+<p>放行http流量，通过ufw allow http</p>
+<p>ufw deny proto tcp from 源 to 目的 port 80</p>
+<p>ufw deny proto tcp from any to IP port 80 </p>
+<p>重置所有规则</p>
+<p>ufw reset</p>
+</li>
+<li>
+<p>登录设置</p>
+<p>登录超时设置</p>
+<p>用户在5分钟内无操作则超时端口连接，需要在/etc/profile添加</p>
+<p>export TMOUT=300</p>
+<p>readonly TMOUT</p>
+</li>
+</ol>
+<p>​	   禁止root直接远程登录</p>
+<p>​		vim ./etc/ssh/sshd_config</p>
+<p>​		permitRootLogin no</p>
+<p>​		限制登录失败次数并锁定</p>
+<p>​		在/etc/pam.d/login后添加</p>
+<p>​		Auth required pam_tally2.so deny=6 unlock_time=180 even_deny_root </p>
+<p>​		root_unlock_time=180</p>
+<p>​		登录IP限制</p>
+<p>​		要与某一段固定IP或IP段绑定，更严格的限制容许SSH的用户和来源IP</p>
+<p>​		Vim /etc/ssh/sshd.config</p>
+<p>​		## allowed ssh users sysmgr</p>
+<p>​		AllowUsers sysmgr@172.29.73.*</p>
+<p>​		DenyUsers <a href="mailto:sysmgr@172.29.73.*">sysmgr@172.29.73.*</a></p>
+<p>​		使用的密钥文件登录</p>
+<p>​		极大提高安全性</p>
+<p>​		减少history命令记录</p>
+<p>​</p>
+<ol start="5">
+<li>
+<p>防止一般网络攻击</p>
+<p>禁ping</p>
+<p>防止IP欺骗</p>
+<p>防止DOS攻击</p>
+</li>
+<li>
+<p>修复已知安全漏洞</p>
+</li>
+<li>
+<p>定期日志安全检查</p>
+</li>
+</ol>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>

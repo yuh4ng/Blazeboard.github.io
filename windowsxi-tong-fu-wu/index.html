@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Baz&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://baz.ee/atom.xml">
+      
+
+      
+          <link rel="stylesheet" href="https://baz.ee/site.css">
+      
+
+      
+      
+    </head>
+
+    <body class="hack dark main container">
+        
+    
+        
+                
+                    <header>
+                        <nav itemscope itemtype="http://schema.org/SiteNavigationElement">
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee">
+                                <span itemprop="name">Home
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;categories">
+                                <span itemprop="name">Categories
+                                </span></a>
+                        
+                            <a itemprop="url"
+                               class=""
+                               href="https:&#x2F;&#x2F;baz.ee&#x2F;tags">
+                                <span itemprop="name">Tags
+                                </span></a>
+                        
+                        </nav>
+                    </header>
+                
+            
+    
+
+<article itemscope itemtype="http://schema.org/BlogPosting">
+    <header>
+        <h1 itemprop="headline">Windows系统服务</h1>
+        <span class="muted">
+    <svg style="margin-bottom:-3px" class="i-clock" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <circle cx="16" cy="16" r="14"/>
+        <path d="M16 8 L16 16 20 20"/>
+    </svg>
+    <span>5 minute read</span>
+    <svg style="margin-bottom: -3px" class="i-edit" viewBox="0 0 32 32"
+         width="16" height="16" fill="none" stroke="currentcolor"
+         stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%">
+        <path d="M30 7 L25 2 5 22 3 29 10 27 Z M21 6 L26 11 Z M5 22 L10 27 Z"/>
+    </svg>
+
+    Published: 2020-08-01
+</span>
+    </header>
+    <div itemprop="articleBody">
+      <p>Windows 系统服务</p>
+<p>IIS服务</p>
+<p>Internet information service就是一个www服务(world wide web)。ISS是一种web服务组件，其中包括web服务器，ftp服务器，分别用于网页浏览，文件传输。</p>
+<span id="continue-reading"></span>
+<p>控制面板-程序-打开或关闭windows功能</p>
+<p>开启了IIS之后，在浏览器里面输入http://localhost，如果可以看到IIS界面，那就说明服务已经开启</p>
+<p>设置web页面</p>
+<p>IIS开启成功之后，下一步就要把我们开发好的网站安装到web服务器的目录中，一般情况下，当web服务器安装成功后，会创建一个系统目录C:\inetpub\wwwroot，我们需要将开发好的网站放到这个路径下，即可实现本地访问</p>
+<p>防火墙放行流量：</p>
+<p>控制面板-系统和安全-windows防火墙-允许应用通过windows防火墙-万维网服务</p>
+<p>FTP服务</p>
+<p>右键我的电脑-管理-服务和应用程序-选择Internet信息服务iis管理，添加ftp站点</p>
+<p>设置FTP账号</p>
+<p>控制面板-管理工具-计算机管理-系统工具-本地用户和组-用户</p>
+<p>防火墙放行FTP流量：</p>
+<ol>
+<li>放行FTP服务器</li>
+<li>出站入站端口放行20、21端口</li>
+</ol>
+<p>远程桌面</p>
+<p>计算机-属性-远程设置-远程</p>
+<p>SSH服务</p>
+<p>设置-应用-应用和功能-管理可选功能-添加功能-open SSH服务端和客户端</p>
+<p>然后使用管理员权限打开cmd，通过命令net start sshd开启ssh服务</p>
+<p>客户端ssh命令：ssh username@127.0.0.1</p>
+<p>windows系统的安全配置：</p>
+<p>账号管理：</p>
+<p>密码复杂性要求：控制面板-管理工具-本地安全策略-账号策略-密码策略</p>
+<p>强制密码历史：使用户不能重复使用最近多少次内已使用的口令</p>
+<p>不存储LAN管理器哈希值：控制面板-管理工具-本地安全策略-安全选项-网络安全</p>
+<p>失败认证次数：本地安全策略-账户策略-账户锁定策略</p>
+<p>认证授权：</p>
+<p>系统强制关机授权：控制面板-管理工具-本地安全策略-用户权限分配</p>
+<p>关闭系统授权：</p>
+<p>取得文件或其他对象所有权授权：</p>
+<p>允许本地访问：</p>
+<p>从网络访问此计算机：</p>
+<p>日志配置：</p>
+<p>控制面板-管理工具-本地安全策略-本地策略-审核策略-审核登录事件</p>
+<p>查看系统日志：控制面板-管理工具-组件服务-事件查看器（本地）-Windows日志</p>
+<p>Windows服务</p>
+<p><img src="images/Windows%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20200731172723579.png" alt="image-20200731172723579" /></p>
+<p><img src="images/Windows%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20200731172740347.png" alt="image-20200731172740347" /></p>
+<p>批量关闭端口操作略</p>
+<p>关闭系统无效启动项：运行里面输入msconfig</p>
+<p>文件共享</p>
+<p>关闭Windows硬盘默认共享：</p>
+<p>开始-运行-输入regedit进入注册表编辑器</p>
+<p>HKLM\System\CurrentControlSet\ Services\LanmanServer\Parameters\下，增加REG_DWORD类型的AutoShareServer 键，值为 0</p>
+<p><img src="images/Windows%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/image-20200731172831315.png" alt="image-20200731172831315" /></p>
+<p>设置共享文件夹访问权限</p>
+<p>路径：控制面板-管理工具-计算机管理-系统工具-共享文件夹-共享</p>
+<p>其他安全设置：</p>
+<p>会话超时设置：</p>
+<p>对于远程登录的账户，如果在15分钟内没有操作就端开连接</p>
+<p>控制面板-管理工具-本地安全策略-本地策略-安全选项-Microsoft网络服务器：暂停会话前所需的时间数量 </p>
+<p>源路由欺骗保护：</p>
+<p>HKLM\System\CurrentControlSet\ Services\Tcpip\Parameters</p>
+<p>新建REG_DWORD：DisableIPSourceRouting，值设置为2。</p>
+<p>碎片攻击保护：</p>
+<p>在HKLM\System\CurrentControlSet\ Services\Tcpip\Parameters\创建REG_DWORD格式的EnablePMTUDiscovery，值设置为1。</p>
+<p>Synflood攻击保护：</p>
+<p>在HKLM\System\CurrentControlSet\ Services\Tcpip\Parameters\创建格式为REG_DWORD的注册表项SynAttackProtect，值设置为2 。</p>
+<p>设置TCP半开会话最大数目：</p>
+<p>在HKLM\System\CurrentControlSet\Services\Tcpip\Parameters\创建格式为REG_DWORD的注册表项TcpMaxHalfOpen，值设置为100 或 500。</p>
+
+    </div>
+
+    
+        <footer>
+            <hr>
+            <p>
+                
+                    Published by Baz
+                
+                
+                    
+                    in <a href="https://baz.ee/categories/an-quan/">安全</a>
+                
+                
+            </p>
+            
+            
+        </footer>
+    
+</article>
+
+
+    </body>
+
+</html>
